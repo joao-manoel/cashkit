@@ -6,6 +6,8 @@ import { serializerCompiler, validatorCompiler, ZodTypeProvider } from "fastify-
 import { authenticateWithGoogle } from "./routes/auth/authenticate-with-google"
 import { getProfile } from "./routes/auth/get-profile"
 import { createWallet } from "./routes/wallets/create-wallet"
+import { getWallet } from "./routes/wallets/get-wallet"
+import { createCard } from "./routes/cards/create-card"
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -22,6 +24,8 @@ app.register(authenticateWithGoogle)
 app.register(getProfile)
 
 app.register(createWallet)
+app.register(getWallet)
+app.register(createCard)
 
 app.listen({port: env.PORT, host: '0.0.0.0'}).then(() => {
   console.log(`Server running on http://localhost:${env.PORT}`)
