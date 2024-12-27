@@ -1,0 +1,183 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String  @id @default(uuid())
+  name      String?
+  email     String  @unique
+  avatarUrl String? @map("avatar_url")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  Token     Token[]
+  Account   Account[]
+  Wallet    Wallet[]
+  Card      Card[]
+  Categorys Categorys[]
+}
+
+enum TokenType {
+  PASSWORD_RECOVER
+}
+
+model Token {
+  id        String    @id @default(uuid())
+  type      TokenType
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map("tokens")
+}
+
+enum AccountProvider {
+  GOOGLE
+}
+
+model Account {
+  id                String          @id @default(uuid())
+  provider          AccountProvider
+  providerAccountId String          @unique @map("provider_account_id")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@unique([provider, userId])
+  @@map("accounts")
+}
+
+model Wallet {
+  id      String @id @default(uuid())
+  name    String
+  ownerId String
+
+  balance BigInt @default(0) @map("balance")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  Transaction Transaction[]
+  Categorys   Categorys[]
+
+  @@map("wallets")
+}
+
+enum BrandCardType {
+  DEFAULT
+  NUBANK
+  BB
+  ITAU
+  SICREDI
+  BRADESCO
+  SANTANDER
+  CAIXA
+  INTER
+  C6BANK
+  NEXT
+  NEON
+  PAN
+  PICPAY
+  INFINITYPAY
+  ITI
+  MERCADOPAGO
+  PAGSEGURO
+}
+
+model Card {
+  id      String        @id @default(uuid())
+  ownerId String        @map("owner_id")
+  brand   BrandCardType @default(DEFAULT)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  Transaction Transaction[]
+
+  @@map("cards")
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+  INVESTMENT
+}
+
+enum TransactionStatusType {
+  paid
+  pending
+}
+
+enum RecurrenceType {
+  VARIABLE
+  MONTH
+  YEAR
+}
+
+model Transaction {
+  id         String                @id @default(uuid())
+  title      String
+  amount     Int
+  type       TransactionType       @default(INCOME)
+  recurrence RecurrenceType        @default(VARIABLE)
+  payDate    DateTime              @map("pay_date")
+  status     TransactionStatusType @default(pending)
+
+  wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  walletId String @map("wallet_id")
+
+  card   Card   @relation(fields: [cardId], references: [id])
+  cardId String @map("card_id")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  Installments Installments[]
+  Categorys    Categorys?     @relation(fields: [categorysId], references: [id])
+  categorysId  String?
+
+  @@map("transactions")
+}
+
+model Installments {
+  id          String                @id @default(uuid())
+  installment Int
+  status      TransactionStatusType
+  isRecurring Boolean               @default(false) @map("is_recurring")
+  payDate     DateTime?             @map("pay_date")
+  paidAt      DateTime?             @map("paid_at")
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  transactionId String
+
+  @@map("installment")
+}
+
+model Categorys {
+  id              String          @id @default(uuid())
+  title           String
+  icon            String
+  transactionType TransactionType @map("transaction_type")
+  createdAt       DateTime        @default(now()) @map("created_at")
+  updatedAt       DateTime        @updatedAt @map("updated_at")
+  isCategoryUser  Boolean         @default(false) @map("is_category_user")
+
+  owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String? @map("owner_id")
+
+  wallet   Wallet? @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  walletId String?
+
+  transaction Transaction[]
+
+  @@map("categorys")
+}
