@@ -55,18 +55,18 @@ model Account {
 }
 
 model Wallet {
-  id      String @id @default(uuid())
-  name    String
-  ownerId String
+  id   String @id @default(uuid())
+  name String
 
-  balance BigInt @default(0) @map("balance")
+  balance Int @default(0) @map("balance")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String
+
   Transaction Transaction[]
-  Categorys   Categorys[]
 
   @@map("wallets")
 }
@@ -93,14 +93,17 @@ enum BrandCardType {
 }
 
 model Card {
-  id      String        @id @default(uuid())
-  ownerId String        @map("owner_id")
-  brand   BrandCardType @default(DEFAULT)
+  id    String        @id @default(uuid())
+  name  String
+  brand BrandCardType @default(DEFAULT)
+  limit Int           @default(0)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user        User          @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  user    User   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  ownerId String @map("owner_id")
+
   Transaction Transaction[]
 
   @@map("cards")
@@ -173,9 +176,6 @@ model Categorys {
 
   owner   User?   @relation(fields: [ownerId], references: [id], onDelete: Cascade)
   ownerId String? @map("owner_id")
-
-  wallet   Wallet? @relation(fields: [walletId], references: [id], onDelete: Cascade)
-  walletId String?
 
   transaction Transaction[]
 
