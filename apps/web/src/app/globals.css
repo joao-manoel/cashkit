@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@layer base {
+  :root {
+    --background: 0 0% 83.9%; /* Cor de fundo ajustada */
+    --foreground: 0 0% 15%; /* Cor de texto escuro para contraste */
+    --card: 0 0% 98%; /* Card de fundo mais claro */
+    --card-foreground: 0 0% 10%; /* Cor de texto dentro do card */
+    --popover: 0 0% 98%; /* Cor de fundo para popover */
+    --popover-foreground: 0 0% 15%; /* Cor de texto para popover */
+    --primary: 0 0% 20%; /* Cor primária ajustada */
+    --primary-foreground: 0 0% 98%; /* Texto primário claro */
+    --secondary: 0 0% 90%; /* Cor secundária mais clara */
+    --secondary-foreground: 0 0% 10%; /* Texto secundário escuro */
+    --muted: 0 0% 90%; /* Cor de fundo atenuada */
+    --muted-foreground: 0 0% 50%; /* Texto atenuado */
+    --accent: 0 0% 90%; /* Cor de destaque */
+    --accent-foreground: 0 0% 10%; /* Texto de destaque */
+    --destructive: 0 84.2% 60.2%; /* Cor de alerta */
+    --destructive-foreground: 0 0% 98%; /* Texto de alerta */
+    --border: 0 0% 75%; /* Cor da borda ajustada */
+    --input: 0 0% 75%; /* Cor de fundo do input */
+    --ring: 0 0% 40%; /* Cor do anel */
+    --chart-1: 12 76% 61%; /* Cor do gráfico 1 */
+    --chart-2: 173 58% 39%; /* Cor do gráfico 2 */
+    --chart-3: 197 37% 24%; /* Cor do gráfico 3 */
+    --chart-4: 43 74% 66%; /* Cor do gráfico 4 */
+    --chart-5: 27 87% 67%; /* Cor do gráfico 5 */
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 0 0% 10%; /* Cor de fundo escura no modo dark */
+    --foreground: 0 0% 98%; /* Cor de texto clara no modo dark */
+    --card: 0 0% 20%; /* Card escuro */
+    --card-foreground: 0 0% 98%; /* Texto claro no card */
+    --popover: 0 0% 20%; /* Popover escuro */
+    --popover-foreground: 0 0% 98%; /* Texto claro no popover */
+    --primary: 0 0% 98%; /* Texto primário claro */
+    --primary-foreground: 0 0% 10%; /* Texto escuro no modo dark */
+    --secondary: 0 0% 15%; /* Cor secundária escura */
+    --secondary-foreground: 0 0% 98%; /* Texto claro no modo dark */
+    --muted: 0 0% 15%; /* Cor atenuada escura */
+    --muted-foreground: 0 0% 60%; /* Texto atenuado claro */
+    --accent: 0 0% 15%; /* Cor de destaque escura */
+    --accent-foreground: 0 0% 98%; /* Texto de destaque claro */
+    --destructive: 0 62.8% 30.6%; /* Alerta escuro */
+    --destructive-foreground: 0 0% 98%; /* Texto de alerta claro */
+    --border: 0 0% 20%; /* Cor da borda escura */
+    --input: 0 0% 25%; /* Cor de fundo do input escura */
+    --ring: 0 0% 70%; /* Cor do anel clara no modo dark */
+    --chart-1: 220 70% 50%; /* Gráfico 1 no modo dark */
+    --chart-2: 160 60% 45%; /* Gráfico 2 no modo dark */
+    --chart-3: 30 80% 55%; /* Gráfico 3 no modo dark */
+    --chart-4: 280 65% 60%; /* Gráfico 4 no modo dark */
+    --chart-5: 340 75% 55%; /* Gráfico 5 no modo dark */
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+.container-wrapper {
+  @apply mx-auto w-full;
+}

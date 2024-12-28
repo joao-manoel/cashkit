@@ -1,0 +1,46 @@
+{
+  "name": "@ck/web",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "pnpm env:load next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "env:load": "dotenv -e ../../.env --",
+    "fix:eslint": "npx eslint --fix src --ext .ts,.tsx",
+    "check:tsc": "npx tsc --noEmit"
+  },
+  "dependencies": {
+    "@ck/env": "workspace:*",
+    "@radix-ui/react-label": "^2.1.1",
+    "@radix-ui/react-slot": "^1.1.1",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.469.0",
+    "next": "15.1.3",
+    "next-themes": "^0.4.4",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tailwind-merge": "^2.6.0",
+    "tailwindcss-animate": "^1.0.7"
+  },
+  "devDependencies": {
+    "@ck/eslint-config": "workspace:*",
+    "@ck/prettier": "workspace:*",
+    "@ck/tsconfig": "workspace:*",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "dotenv-cli": "^7.4.2",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  },
+  "prettier": "@ck/prettier",
+  "eslintConfig": {
+    "extends": [
+      "@ck/eslint-config/next"
+    ]
+  }
+}
