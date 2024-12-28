@@ -2,8 +2,11 @@ import { Button } from "./ui/button"
 import Image from "next/image"
 import LogoIcon from "@/assets/images/logo-icon.svg"
 import Link from "next/link"
+import { isAuthenticated } from "@/auth/auth"
 
-export function Header() {
+export async function Header() {
+  const isAuth = await isAuthenticated()
+  
   return (
     <header className="border-grid sticky top-0 z-50 w-full border-b bg-white/30 backdrop-blur supports-[backdrop-filter]:bg-white/60">
       <div className="container-wrapper">
@@ -15,9 +18,11 @@ export function Header() {
             </a>
           </div>
           <div className="flex flex-1 items-center justify-between gap-2 md:justify-end">
-            <Button size="sm" variant="ghost">
-              <Link href="/sign-in">Entrar</Link>
-            </Button>
+            {!isAuth && (
+              <Button size="sm" variant="ghost">
+                <Link href="/sign-in">Entrar</Link>
+              </Button>
+            )}
           </div>
         </div>
       </div>

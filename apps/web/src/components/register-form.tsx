@@ -38,9 +38,7 @@ export function RegisterForm({
             </Button>
           </div>
           <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-            <span className="relative z-10 bg-background px-2 text-white-foreground">
-              Ou
-            </span>
+            
           </div>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
@@ -49,7 +47,6 @@ export function RegisterForm({
                 id="name"
                 type="text"
                 placeholder="John Doe"
-                required
               />
             </div>
             <div className="grid gap-2">
@@ -58,7 +55,6 @@ export function RegisterForm({
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                required
               />
             </div>
             <div className="grid gap-2">
@@ -67,7 +63,6 @@ export function RegisterForm({
                 id="repeat-email"
                 type="email"
                 placeholder="m@example.com"
-                required
               />
             </div>
             <Button type="submit" className="w-full">
