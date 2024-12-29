@@ -3,6 +3,7 @@ import Image from "next/image"
 import LogoIcon from "@/assets/images/logo-icon.svg"
 import Link from "next/link"
 import { isAuthenticated } from "@/auth/auth"
+import ProfileButton from "./profile-button"
 
 export async function Header() {
   const isAuth = await isAuthenticated()
@@ -18,10 +19,12 @@ export async function Header() {
             </a>
           </div>
           <div className="flex flex-1 items-center justify-between gap-2 md:justify-end">
-            {!isAuth && (
+            {!isAuth ? (
               <Button size="sm" variant="ghost">
                 <Link href="/sign-in">Entrar</Link>
               </Button>
+            ) : (
+              <ProfileButton />
             )}
           </div>
         </div>
