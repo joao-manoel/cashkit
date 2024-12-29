@@ -1,24 +1,21 @@
-
-
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { signInWithGoogleAction } from "@/app/(auth)/action"
+import { signInWithGoogleAction } from '@/app/(auth)/action'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { cn } from '@/lib/utils'
 
 export function LoginForm({
   className,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: React.ComponentPropsWithoutRef<'div'>) {
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
+    <div className={cn('flex flex-col gap-6', className)} {...props}>
       <form>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
-            
             <h1 className="text-xl font-bold">Fazer login</h1>
             <div className="text-center text-sm">
-              Você não tem uma conta?{" "}
+              Você não tem uma conta?{' '}
               <a href="sign-up" className="underline underline-offset-4">
                 Cadastra-se.
               </a>
@@ -26,7 +23,7 @@ export function LoginForm({
           </div>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">E-mail</Label>
               <Input
                 id="email"
                 type="email"
@@ -35,15 +32,14 @@ export function LoginForm({
               />
             </div>
             <Button type="submit" className="w-full">
-              Login
+              Continuar
             </Button>
           </div>
           <div className="relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t after:border-border">
-            <span className="relative z-10 bg-background px-2 text-white-foreground">
-              Or
+            <span className="text-white-foreground relative z-10 bg-background px-2">
+              Ou
             </span>
           </div>
-          
         </div>
       </form>
       <div className="grid gap-4 sm:grid-cols-1">
@@ -55,13 +51,12 @@ export function LoginForm({
                 fill="currentColor"
               />
             </svg>
-            Continue with Google
+            Continue com Google
           </Button>
         </form>
-            
       </div>
-      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary  ">
-        By clicking continue, you agree to our <a href="#">Terms of Service</a>{" "}
+      <div className="text-balance text-center text-xs text-muted-foreground [&_a]:underline [&_a]:underline-offset-4 hover:[&_a]:text-primary">
+        By clicking continue, you agree to our <a href="#">Terms of Service</a>{' '}
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>

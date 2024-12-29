@@ -5,4 +5,9 @@ module.exports = {
   rules: {
     'simple-import-sort/imports': 'error',
   },
+  overrides: [
+    {
+      files: ['src/**/*.ts', 'src/**/*.tsx'],
+    },
+  ],
 }

@@ -4,18 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "pnpm env:load tsx watch src/http/server.ts",
-    "env:load": "dotenv -e ../../.env --"
+    "dev": "start pnpm env:load tsx watch src/http/server.ts & start pnpm dev:queue",
+    "dev:queue": "pnpm env:load tsx watch src/queue/queue.ts",
+    "env:load": "dotenv -e ../../.env --",
+    "fix:eslint": "pnpm eslint --fix src --ext .ts,.tsx"
   },
   "dependencies": {
     "@ck/env": "workspace:*",
     "@fastify/cors": "^10.0.1",
     "@fastify/jwt": "^9.0.2",
     "@prisma/client": "6.1.0",
+    "bull": "^4.16.5",
     "dotenv-cli": "^8.0.0",
     "fastify": "^5.2.0",
     "fastify-plugin": "^5.0.1",
     "fastify-type-provider-zod": "^4.0.2",
+    "handlebars": "^4.7.8",
+    "nodemailer": "^6.9.16",
     "zod": "^3.23.8"
   },
   "devDependencies": {
@@ -23,11 +28,19 @@
     "@ck/prettier": "workspace:*",
     "@ck/tsconfig": "workspace:*",
     "@types/node": "^20.14.9",
+    "eslint": "8",
+    "@types/nodemailer": "^6.4.17",
     "prisma": "^6.1.0",
     "tsup": "^8.3.5",
     "tsx": "^4.19.2"
   },
   "keywords": [],
   "author": "joao-manoel",
-  "license": "ISC"
+  "license": "ISC",
+  "prettier": "@ck/prettier",
+  "eslintConfig": {
+    "extends": [
+      "@ck/eslint-config/node"
+    ]
+  }
 }

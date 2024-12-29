@@ -11,4 +11,15 @@ services:
       - POSTGRES_PASSWORD=docker
       - POSTGRES_DB=cashkit  
 
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data    
+
 name: cashkit
+
+volumes:
+  redis_data:

@@ -21,6 +21,7 @@ model User {
   Wallet    Wallet[]
   Card      Card[]
   Categorys Categorys[]
+  AuthCode  AuthCode[]
 }
 
 enum TokenType {
@@ -36,6 +37,19 @@ model Token {
   userId String @map("user_id")
 
   @@map("tokens")
+}
+
+model AuthCode {
+  id        String   @id @default(uuid())
+  code      Int      @unique
+  createdAt DateTime @default(now()) @map("created_at")
+  attempts  Int      @map("attempts")
+  expiresAt DateTime
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map("auth_code")
 }
 
 enum AccountProvider {
