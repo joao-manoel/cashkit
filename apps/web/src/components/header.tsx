@@ -11,7 +11,7 @@ export async function Header() {
   const isAuth = await isAuthenticated()
 
   return (
-    <header className="border-grid sticky top-0 z-50 w-full border-b bg-black backdrop-blur supports-[backdrop-filter]:bg-black">
+    <header className="top-0 z-50 w-full bg-black backdrop-blur supports-[backdrop-filter]:bg-black">
       <div className="container-wrapper">
         <div className="container flex h-14 items-center">
           <div className="mr-4 hidden md:flex">
