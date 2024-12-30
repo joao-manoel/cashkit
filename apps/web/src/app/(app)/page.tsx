@@ -2,12 +2,14 @@ import { TrendingDownIcon, TrendingUpIcon, WalletIcon } from 'lucide-react'
 
 import SummaryCard from '@/components/summary-card'
 
+import Tab from './tab'
+
 export default function HomePage() {
   return (
     <div className="w-full">
       <div className="w-full bg-black">
-        <header className="container relative h-[176px] w-full">
-          <div className="absolute bottom-0 left-0 right-0 flex translate-y-1/2 transform justify-between px-4">
+        <header className="container relative h-[176px]">
+          <div className="absolute bottom-0 left-0 right-0 flex translate-y-1/2 transform justify-between">
             <SummaryCard
               title="Saldo"
               amount={2000}
@@ -27,6 +29,9 @@ export default function HomePage() {
         </header>
       </div>
       <div className="h-[100px]"></div> {/* Espaço para os cards */}
+      <div className="container">
+        <Tab />
+      </div>
     </div>
   )
 }
