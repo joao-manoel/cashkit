@@ -9,7 +9,7 @@ import {
 } from 'fastify-type-provider-zod'
 
 import { errorHandler } from './errors/error-handler'
-import { authenticateWithEmailCode } from './routes/auth/authenticate-with-email-code'
+import { authenticateWithEmail } from './routes/auth/authenticate-with-email'
 import { authenticateWithGoogle } from './routes/auth/authenticate-with-google'
 import { getProfile } from './routes/auth/get-profile'
 import { requestAuthCode } from './routes/auth/request-auth-code'
@@ -29,7 +29,7 @@ app.setSerializerCompiler(serializerCompiler)
 app.register(fastifyCors, { origin: '*' })
 
 app.register(authenticateWithGoogle)
-app.register(authenticateWithEmailCode)
+app.register(authenticateWithEmail)
 app.register(requestAuthCode)
 app.register(getProfile)
 

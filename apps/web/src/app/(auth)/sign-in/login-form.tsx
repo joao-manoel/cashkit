@@ -1,16 +1,29 @@
-import { signInWithGoogleAction } from '@/app/(auth)/action'
+'use client'
+import { useRouter } from 'next/navigation'
+import { useEffect } from 'react'
+
+import { FloatingLabelInput } from '@/components/floating-label-input'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import { useFormState } from '@/hooks/use-form-state'
 import { cn } from '@/lib/utils'
 
-export function LoginForm({
-  className,
-  ...props
-}: React.ComponentPropsWithoutRef<'div'>) {
+import { requestAuthCodeAction, signInWithGoogleAction } from '../action'
+
+export default function LoginForm() {
+  const router = useRouter()
+  const [{ success, message }, handleSubmit, isPending] = useFormState(
+    requestAuthCodeAction,
+  )
+
+  useEffect(() => {
+    if (success) {
+      router.push(`/sign-in/verify?email=${message}`)
+    }
+  }, [success, message, router])
+
   return (
-    <div className={cn('flex flex-col gap-6', className)} {...props}>
-      <form>
+    <div className={cn('flex flex-col gap-6')}>
+      <form onSubmit={handleSubmit}>
         <div className="flex flex-col gap-6">
           <div className="flex flex-col items-center gap-2">
             <h1 className="text-xl font-bold">Fazer login</h1>
@@ -23,15 +36,14 @@ export function LoginForm({
           </div>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="email">E-mail</Label>
-              <Input
+              <FloatingLabelInput
                 id="email"
                 type="email"
-                placeholder="m@example.com"
-                required
+                name="email"
+                label="Email"
               />
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={isPending}>
               Continuar
             </Button>
           </div>

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "start pnpm env:load tsx watch src/http/server.ts & start pnpm dev:queue",
+    "dev": "start pnpm dev:queue & pnpm env:load tsx watch src/http/server.ts",
     "dev:queue": "pnpm env:load tsx watch src/queue/queue.ts",
     "env:load": "dotenv -e ../../.env --",
     "fix:eslint": "pnpm eslint --fix src --ext .ts,.tsx"

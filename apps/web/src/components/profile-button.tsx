@@ -32,12 +32,14 @@ export default async function ProfileButton() {
         </Avatar>
 
         <div className="flex flex-col items-start">
-          <span className="text-sm font-medium">{user?.name}</span>
+          <span className="text-sm font-medium text-zinc-200">
+            {user?.name}
+          </span>
           <span className="text-xs text-muted-foreground">{user?.email}</span>
         </div>
         <ChevronDown className="size-4 text-muted-foreground" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-[200px]">
+      <DropdownMenuContent align="end" className="mt-2 w-[200px]">
         <DropdownMenuItem asChild>
           <a href="/api/auth/sign-out">Sair</a>
         </DropdownMenuItem>

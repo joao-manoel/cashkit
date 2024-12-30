@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { UnauthorizedError } from '@/http/errors/unauthorized-error'
 import { prisma } from '@/lib/prisma'
 
-export async function authenticateWithEmailCode(app: FastifyInstance) {
+export async function authenticateWithEmail(app: FastifyInstance) {
   app.withTypeProvider<ZodTypeProvider>().post(
     '/session/email',
     {
@@ -51,7 +51,7 @@ export async function authenticateWithEmailCode(app: FastifyInstance) {
       })
 
       if (!authCode) {
-        throw new UnauthorizedError('Invalid code.')
+        throw new UnauthorizedError('Codigo invalido.')
       }
 
       if (authCode.expiresAt < new Date()) {

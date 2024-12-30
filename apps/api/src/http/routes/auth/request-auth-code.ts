@@ -18,9 +18,7 @@ export async function requestAuthCode(app: FastifyInstance) {
           email: z.string(),
         }),
         response: {
-          201: z.object({
-            message: z.string().optional(),
-          }),
+          201: z.null(),
         },
       },
     },
@@ -80,7 +78,7 @@ export async function requestAuthCode(app: FastifyInstance) {
 
       await Queue.add('RequestAuthCodeWithEmail', { email, code })
 
-      return reply.status(201).send({ message: 'ok' })
+      return reply.status(201).send()
     },
   )
 }
