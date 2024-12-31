@@ -3,6 +3,8 @@ import './globals.css'
 import { Roboto } from '@next/font/google'
 import type { Metadata } from 'next'
 
+import Header from '@/components/header'
+
 import Providers from './providers'
 
 const roboto = Roboto({
@@ -26,6 +28,7 @@ export default function RootLayout({
         cz-shortcut-listen="true"
         className={`dark overflow-hidden bg-background ${roboto.className}`}
       >
+        <Header />
         <Providers>{children}</Providers>
       </body>
     </html>

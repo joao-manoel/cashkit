@@ -2,10 +2,13 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import LogoIcon from '@/assets/images/logo-icon.svg'
+import { isAuthenticated } from '@/auth/auth'
 
 import ProfileButton from './profile-button'
 import { Button } from './ui/button'
-export default function Header() {
+export default async function Header() {
+  const isAuth = await isAuthenticated()
+
   return (
     <header className="sticky z-50 flex items-center justify-between border-b p-4 dark:bg-[#171716]">
       <div className="flex items-center gap-4">
@@ -19,9 +22,8 @@ export default function Header() {
           </span>
         </Link>
       </div>
-      <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-sm"></div>
-        <ProfileButton />
+      <div className="flex items-center gap-4">
+        {isAuth && <ProfileButton />}
       </div>
     </header>
   )

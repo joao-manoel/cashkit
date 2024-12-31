@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 
 import { isAuthenticated } from '@/auth/auth'
-import Header from '@/components/header'
 import NavBar from '@/components/navbar'
 
 export default async function AuthLayout({
@@ -15,7 +14,6 @@ export default async function AuthLayout({
 
   return (
     <div className="h-screen">
-      <Header />
       <div className="flex h-full">
         <div className="w-[80px] md:w-[80px] lg:w-[240px] xl:w-[250px]">
           <NavBar />
