@@ -1,36 +1,29 @@
-import { TrendingDownIcon, TrendingUpIcon, WalletIcon } from 'lucide-react'
+import { isMatch } from 'date-fns'
+import { redirect } from 'next/navigation'
 
-import SummaryCard from '@/components/summary-card'
+import NavigationMonth from '@/components/navigation-month'
+interface HomeProps {
+  searchParams: { month: string; year: string }
+}
+export default function HomePage({ searchParams: { month, year } }: HomeProps) {
+  const monthIsInvalid = !month || !isMatch(month, 'MM')
 
-import Tab from './tab'
+  const date = new Date()
 
-export default function HomePage() {
+  const currentMonth =
+    date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+
+  if (monthIsInvalid) {
+    redirect(`/?month=${currentMonth}&year=${date.getFullYear().toString()}`)
+  }
   return (
-    <div className="w-full">
-      <div className="w-full bg-black">
-        <header className="container relative h-[176px]">
-          <div className="absolute bottom-0 left-0 right-0 flex translate-y-1/2 transform justify-between">
-            <SummaryCard
-              title="Saldo"
-              amount={2000}
-              icon={<WalletIcon size={16} />}
-            />
-            <SummaryCard
-              title="Receitas"
-              amount={2000}
-              icon={<TrendingUpIcon size={14} className="text-green-500" />}
-            />
-            <SummaryCard
-              title="Despesas"
-              amount={2000}
-              icon={<TrendingDownIcon size={14} className="text-red-500" />}
-            />
-          </div>
+    <div className="container-wrapper">
+      <div className="container p-4">
+        <header className="flex items-center justify-between">
+          <h1 className="text-lg font-bold">Dashboard</h1>
+
+          <NavigationMonth date={`${year}-${month}-01`} />
         </header>
-      </div>
-      <div className="h-[100px]"></div> {/* Espaço para os cards */}
-      <div className="container">
-        <Tab />
       </div>
     </div>
   )

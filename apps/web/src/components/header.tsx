@@ -2,36 +2,26 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import LogoIcon from '@/assets/images/logo-icon.svg'
-import { isAuthenticated } from '@/auth/auth'
 
 import ProfileButton from './profile-button'
 import { Button } from './ui/button'
-
-export async function Header() {
-  const isAuth = await isAuthenticated()
-
+export default function Header() {
   return (
-    <header className="top-0 z-50 w-full bg-black backdrop-blur supports-[backdrop-filter]:bg-black">
-      <div className="container-wrapper">
-        <div className="container flex h-14 items-center">
-          <div className="mr-4 hidden md:flex">
-            <a href="/" className="mr-4 flex items-center gap-2 invert lg:mr-6">
-              <Image src={LogoIcon} alt="Icone" className="size-5 text-white" />
-              <span className="hidden font-bold text-black lg:inline-block">
-                CashKit
-              </span>
-            </a>
-          </div>
-          <div className="flex flex-1 items-center justify-between gap-2 md:justify-end">
-            {!isAuth ? (
-              <Button size="sm" variant="ghost" className="text-white">
-                <Link href="/sign-in">Entrar</Link>
-              </Button>
-            ) : (
-              <ProfileButton />
-            )}
-          </div>
-        </div>
+    <header className="sticky z-50 flex items-center justify-between border-b p-4 dark:bg-[#171716]">
+      <div className="flex items-center gap-4">
+        <Button size="icon" className="bg-muted hover:bg-muted/60">
+          <Image src="./menu-left.svg" alt="collapse" width={16} height={16} />
+        </Button>
+        <Link href="/" className="flex items-center gap-2">
+          <Image src={LogoIcon} className="size-6 dark:invert" alt="cashkit" />
+          <span className="text-lg font-medium">
+            Cash<span className="font-bold text-blue-600">Kit</span>
+          </span>
+        </Link>
+      </div>
+      <div className="flex items-center gap-2">
+        <div className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-sm"></div>
+        <ProfileButton />
       </div>
     </header>
   )

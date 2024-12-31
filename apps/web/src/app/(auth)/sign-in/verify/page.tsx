@@ -80,13 +80,15 @@ export default function VerifyOTPPage() {
   return (
     <div className="flex min-h-[calc(100vh-80px)] w-full flex-col items-center justify-center gap-6 p-6 md:p-10">
       <div className="flex items-center justify-center">
-        <div className="w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow-md">
-          <h2 className="text-center text-2xl font-bold text-gray-800">
-            Verificação de Código
-          </h2>
-          <p className="text-center text-sm text-gray-600">
-            Verifique seu email para receber o código de verificação.
-          </p>
+        <div className="w-full max-w-md space-y-6 rounded-lg bg-white p-8 shadow-md dark:bg-black/20">
+          <div className="space-y-2">
+            <h2 className="text-center text-2xl font-bold text-gray-800 dark:text-white">
+              Verificação de Código
+            </h2>
+            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+              Verifique seu email para receber o código de verificação.
+            </p>
+          </div>
 
           {error && (
             <Alert variant="destructive">
@@ -131,7 +133,10 @@ export default function VerifyOTPPage() {
               )}
             </p>
           </div>
-          <Button className="w-full" onClick={handleValidate}>
+          <Button
+            className="w-full dark:bg-blue-600 dark:text-white dark:hover:bg-blue-700"
+            onClick={handleValidate}
+          >
             Validar Código
           </Button>
         </div>
