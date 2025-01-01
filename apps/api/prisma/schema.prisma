@@ -70,9 +70,9 @@ model Account {
 
 model Wallet {
   id   String @id @default(uuid())
-  name String
+  name String @default("default")
 
-  balance Int @default(0) @map("balance")
+  balance Int @default(0)
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

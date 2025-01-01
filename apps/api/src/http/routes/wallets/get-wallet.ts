@@ -11,13 +11,10 @@ export async function getWallet(app: FastifyInstance) {
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
     .get(
-      '/wallet/:walletId',
+      '/wallet',
       {
         schema: {
           security: [{ bearerAuth: [] }],
-          params: z.object({
-            id: z.string(),
-          }),
           response: {
             200: z.object({
               id: z.string(),
@@ -30,11 +27,8 @@ export async function getWallet(app: FastifyInstance) {
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
 
-        const { id } = request.params
-
         const wallet = await prisma.wallet.findFirst({
           where: {
-            id,
             ownerId: userId,
           },
           select: {

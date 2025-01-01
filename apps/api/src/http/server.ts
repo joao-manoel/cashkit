@@ -16,6 +16,7 @@ import { requestAuthCode } from './routes/auth/request-auth-code'
 import { createCard } from './routes/cards/create-card'
 import { createWallet } from './routes/wallets/create-wallet'
 import { getWallet } from './routes/wallets/get-wallet'
+import { getTransactions } from './routes/wallets/transactions/get-transactions'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -36,6 +37,8 @@ app.register(getProfile)
 app.register(createWallet)
 app.register(getWallet)
 app.register(createCard)
+
+app.register(getTransactions)
 
 errorHandler(app)
 

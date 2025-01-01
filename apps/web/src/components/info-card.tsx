@@ -6,14 +6,14 @@ interface InfoCardProps {
   title: string
   amount: number
   icon: ReactNode
-  color: 'green' | 'red' | 'yellow'
+  color?: 'green' | 'red' | 'yellow' | 'default'
 }
 
 export default function InfoCard({
   title,
   amount,
   icon,
-  color,
+  color = 'default',
 }: InfoCardProps) {
   return (
     <Card>
@@ -23,7 +23,7 @@ export default function InfoCard({
       </CardHeader>
       <CardContent>
         <div
-          className={`text-2xl font-bold ${color === 'green' ? 'text-green-500' : color === 'red' ? 'text-red-500' : 'text-yellow-500'} `}
+          className={`text-2xl font-bold ${color === 'green' ? 'text-green-500' : color === 'red' ? 'text-red-500' : color === 'yellow' ? 'text-yellow-500' : 'text-black dark:text-white'} `}
         >
           {Intl.NumberFormat('pt-BR', {
             style: 'currency',

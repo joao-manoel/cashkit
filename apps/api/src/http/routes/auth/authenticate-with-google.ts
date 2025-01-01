@@ -114,6 +114,11 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
             email,
             name,
             avatarUrl,
+            Wallet: {
+              create: {
+                name: 'default',
+              },
+            },
           },
         })
       }

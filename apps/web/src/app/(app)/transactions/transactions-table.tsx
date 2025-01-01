@@ -1,16 +1,23 @@
 'use client'
 import {
-  ArrowDownCircle,
-  ArrowUpCircle,
   Check,
   CheckCircle2,
+  CircleArrowDown,
+  CircleArrowUp,
   CircleDashed,
-  PlusCircle,
+  CircleFadingArrowUp,
+  Filter,
+  PiggyBank,
   Search,
   Trash,
+  Wallet,
+  X,
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
 
+import { Transactions } from '@/@types/transactions-types'
+import CreateTransactionButton from '@/components/create-transactions-button'
+import InfoCard from '@/components/info-card'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,93 +39,40 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
   Table,
   TableBody,
-  TableCaption,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
 
-import InfoCard from './info-card'
-
-type Transaction = {
-  id: string
-  titulo: string
-  valor: number
-  tipo: 'Receita' | 'Despesa'
-  recorrencia: 'variavel' | 'mensal' | 'anual'
-  status: 'Pago' | 'Pendente'
-  formaPagamento: string
+interface TransactionTableProps {
+  initialTransactions: Transactions[]
 }
 
-const initialTransactions: Transaction[] = [
-  {
-    id: '1',
-    titulo: 'Salário',
-    valor: 500000,
-    tipo: 'Receita',
-    recorrencia: 'mensal',
-    status: 'Pago',
-    formaPagamento: 'Transferência',
-  },
-  {
-    id: '2',
-    titulo: 'Aluguel',
-    valor: 150000,
-    tipo: 'Despesa',
-    recorrencia: 'mensal',
-    status: 'Pendente',
-    formaPagamento: 'Boleto',
-  },
-  {
-    id: '3',
-    titulo: 'Compra de Laptop',
-    valor: 300000,
-    tipo: 'Despesa',
-    recorrencia: 'variavel',
-    status: 'Pago',
-    formaPagamento: 'Cartão de Crédito',
-  },
-  {
-    id: '4',
-    titulo: 'Bônus Anual',
-    valor: 200000,
-    tipo: 'Receita',
-    recorrencia: 'anual',
-    status: 'Pendente',
-    formaPagamento: 'Transferência',
-  },
-]
-
-export function TransactionsTable() {
+export function TransactionsTable({
+  initialTransactions,
+}: TransactionTableProps) {
   const [transactions, setTransactions] =
-    useState<Transaction[]>(initialTransactions)
+    useState<Transactions[]>(initialTransactions)
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredTransactions, setFilteredTransactions] =
-    useState<Transaction[]>(transactions)
+    useState<Transactions[]>(transactions)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
-  const [typeFilter, setTypeFilter] = useState<'Receita' | 'Despesa' | 'all'>(
-    'all',
-  )
+  const [typeFilter, setTypeFilter] = useState<
+    'INCOME' | 'EXPENSE' | 'INVESTMENT' | 'ALL'
+  >('ALL')
 
   useEffect(() => {
     const filtered = transactions.filter(
       (transaction) =>
-        (transaction.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          transaction.formaPagamento
+        (transaction.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          transaction.card.name
             .toLowerCase()
             .includes(searchTerm.toLowerCase())) &&
-        (typeFilter === 'all' || transaction.tipo === typeFilter),
+        (typeFilter === 'ALL' || transaction.type === typeFilter),
     )
     setFilteredTransactions(filtered)
   }, [searchTerm, transactions, typeFilter])
@@ -139,7 +93,7 @@ export function TransactionsTable() {
     }
   }
 
-  const handleStatusChange = (newStatus: 'Pago' | 'Pendente') => {
+  const handleStatusChange = (newStatus: 'paid' | 'pending') => {
     setTransactions((prev) =>
       prev.map((transaction) =>
         selectedTransactions.includes(transaction.id)
@@ -159,38 +113,44 @@ export function TransactionsTable() {
     setIsDeleteDialogOpen(false)
   }
 
-  const totalDespesas = transactions
-    .filter((t) => t.tipo === 'Despesa')
-    .reduce((sum, t) => sum + t.valor, 0)
+  const totalDespesasPedent = transactions
+    .filter((t) => t.type === 'EXPENSE' && t.status === 'pending')
+    .reduce((sum, t) => sum + t.amount, 0)
 
-  const totalReceitas = transactions
-    .filter((t) => t.tipo === 'Receita')
-    .reduce((sum, t) => sum + t.valor, 0)
+  const totalDespesasPaid = transactions
+    .filter((t) => t.type === 'EXPENSE' && t.status === 'paid')
+    .reduce((sum, t) => sum + t.amount, 0)
 
-  const totalPendentes = transactions
-    .filter((t) => t.status === 'Pendente')
-    .reduce((sum, t) => sum + t.valor, 0)
+  const totalReceitasPendent = transactions
+    .filter((t) => t.type === 'INCOME' && t.status === 'pending')
+    .reduce((sum, t) => sum + t.amount, 0)
+
+  const total =
+    transactions
+      .filter((t) => t.type === 'INCOME' && t.status === 'paid')
+      .reduce((sum, t) => sum + t.amount, 0) - totalDespesasPaid
 
   return (
     <div className="mt-4 space-y-4">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <InfoCard
-          amount={totalReceitas}
-          title="Total de Receitas"
+          amount={total}
+          title="Saldo"
+          icon={<Wallet className="h-4 w-4 text-white" />}
+        />
+        <InfoCard
+          amount={totalReceitasPendent}
+          title="Receitas Pendentes"
           color="green"
-          icon={<ArrowUpCircle className="h-4 w-4 text-green-500" />}
+          icon={<CircleFadingArrowUp className="h-4 w-4 text-green-500" />}
         />
         <InfoCard
-          amount={totalDespesas}
-          title="Total de Despesas"
+          amount={totalDespesasPedent}
+          title="Despesas Pendentes"
           color="red"
-          icon={<ArrowDownCircle className="h-4 w-4 text-red-500" />}
-        />
-        <InfoCard
-          amount={totalPendentes}
-          title="Total Pendente"
-          color="yellow"
-          icon={<CircleDashed className="h-4 w-4 text-yellow-500" />}
+          icon={
+            <CircleFadingArrowUp className="h-4 w-4 rotate-180 text-red-500" />
+          }
         />
       </div>
       <div className="flex h-[40px] items-center justify-between">
@@ -211,21 +171,42 @@ export function TransactionsTable() {
               <Search />
             </Button>
           </div>
-          <Select
-            value={typeFilter}
-            onValueChange={(value: 'Receita' | 'Despesa' | 'all') =>
-              setTypeFilter(value)
-            }
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filtrar por tipo" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos</SelectItem>
-              <SelectItem value="Receita">Receita</SelectItem>
-              <SelectItem value="Despesa">Despesa</SelectItem>
-            </SelectContent>
-          </Select>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="flex gap-2 bg-background">
+                <Filter className="lg:hidden" />
+                <span className="hidden lg:flex lg:items-center">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <span>Filtrar</span>
+                </span>
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem
+                onClick={() => setTypeFilter('INCOME')}
+                disabled={typeFilter === 'INCOME'}
+              >
+                <CircleArrowUp className="mr-2 h-4 w-4 text-green-500" />
+                <span>Receitas</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setTypeFilter('EXPENSE')}
+                disabled={typeFilter === 'EXPENSE'}
+              >
+                <CircleArrowDown className="mr-2 h-4 w-4 text-red-500" />
+                <span>Despesas</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => setTypeFilter('INVESTMENT')}
+                disabled={typeFilter === 'INVESTMENT'}
+              >
+                <PiggyBank className="mr-2 h-4 w-4 text-yellow-500" />
+                <span>Investimentos</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {selectedTransactions.length > 0 && (
             <div className="flex items-center gap-2 p-2 lg:p-0">
               <DropdownMenu>
@@ -242,12 +223,12 @@ export function TransactionsTable() {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => handleStatusChange('Pago')}>
+                  <DropdownMenuItem onClick={() => handleStatusChange('paid')}>
                     <CheckCircle2 className="mr-2 h-4 w-4" />
                     <span>Pago</span>
                   </DropdownMenuItem>
                   <DropdownMenuItem
-                    onClick={() => handleStatusChange('Pendente')}
+                    onClick={() => handleStatusChange('pending')}
                   >
                     <CircleDashed className="mr-2 h-4 w-4" />
                     <span>Pendente</span>
@@ -294,18 +275,23 @@ export function TransactionsTable() {
           )}
         </div>
         <div className="flex items-center">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex h-[40px] items-center bg-blue-700 hover:bg-blue-800"
-          >
-            <PlusCircle />
-            <span className="hidden lg:block">Nova Transação</span>
-          </Button>
+          <CreateTransactionButton />
         </div>
       </div>
+      <div className="flex items-center gap-2 pl-2 text-xs">
+        {typeFilter !== 'ALL' && (
+          <Button
+            size="sm"
+            className="min-w-19 h-6 rounded-md p-1 text-[10px] text-zinc-700 outline-dashed outline-zinc-800"
+            variant="ghost"
+            onClick={() => setTypeFilter('ALL')}
+          >
+            <X className="size-1" />
+            <span className="">{typeFilter}</span>
+          </Button>
+        )}
+      </div>
       <Table className="border bg-background">
-        <TableCaption>Lista de transações financeiras.</TableCaption>
         <TableHeader>
           <TableRow>
             <TableHead className="w-[50px]">
@@ -319,12 +305,13 @@ export function TransactionsTable() {
                 }
               />
             </TableHead>
-            <TableHead>Título</TableHead>
-            <TableHead>Valor</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Recorrência</TableHead>
-            <TableHead>Forma de Pagamento</TableHead>
+            <TableHead className="">Descrição</TableHead>
+            <TableHead className="text-center">Valor</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-center">Tipo</TableHead>
+            <TableHead className="text-center">Vencimento</TableHead>
+            <TableHead className="text-center">Forma de Pagamento</TableHead>
+            <TableHead className="text-center">Recorrência</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -336,23 +323,35 @@ export function TransactionsTable() {
                   onCheckedChange={() => handleCheckboxChange(transaction.id)}
                 />
               </TableCell>
-              <TableCell className="font-medium">
-                {transaction.titulo}
-              </TableCell>
-              <TableCell>
+              <TableCell className="font-medium">{transaction.title}</TableCell>
+              <TableCell className="text-center">
                 {Intl.NumberFormat('pt-BR', {
                   style: 'currency',
                   currency: 'BRL',
-                }).format(transaction.valor / 100)}
+                }).format(transaction.amount / 100)}
               </TableCell>
-              <TableCell>{transaction.status}</TableCell>
-              <TableCell>{transaction.tipo}</TableCell>
-              <TableCell>{transaction.recorrencia}</TableCell>
-              <TableCell>{transaction.formaPagamento}</TableCell>
+              <TableCell className="text-center">
+                {transaction.status}
+              </TableCell>
+              <TableCell className="text-center">{transaction.type}</TableCell>
+              <TableCell className="text-center">
+                {transaction.payDate}
+              </TableCell>
+              <TableCell className="text-center">
+                {transaction.card.name}
+              </TableCell>
+              <TableCell className="text-center">
+                {transaction.recurrence}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
       </Table>
+      <div className="h-6">
+        <p className="text-xs text-gray-500">
+          Total de transações: {filteredTransactions.length}
+        </p>
+      </div>
     </div>
   )
 }

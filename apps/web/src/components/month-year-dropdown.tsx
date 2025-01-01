@@ -6,6 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
+import { redirect } from 'next/navigation'
 import React, { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
@@ -43,6 +44,7 @@ export function MonthYearDropdown() {
   const handleMonthSelect = (monthIndex: number) => {
     setSelectedMonth(monthIndex)
     setSelectedYear(viewYear)
+    redirect(`?month=${monthIndex + 1}&year=${viewYear}`)
   }
 
   return (
@@ -50,7 +52,7 @@ export function MonthYearDropdown() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="min-w-40 justify-between bg-black/20 lg:min-w-52"
+          className="min-w-40 justify-between bg-gray-100 dark:bg-black/20 lg:min-w-52"
         >
           <CalendarDays />
           <span className="flex flex-col text-sm font-medium lg:flex-row lg:gap-2">
@@ -93,7 +95,7 @@ export function MonthYearDropdown() {
               }
               className={`justify-center font-normal ${
                 selectedMonth === index && selectedYear === viewYear
-                  ? 'bg-primary text-primary-foreground'
+                  ? 'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground'
                   : ''
               }`}
               onClick={() => handleMonthSelect(index)}

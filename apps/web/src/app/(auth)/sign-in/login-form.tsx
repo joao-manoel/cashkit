@@ -62,7 +62,7 @@ export default function LoginForm() {
         <form action={signInWithGoogleAction}>
           <Button
             variant="outline"
-            className="w-full dark:text-black dark:hover:bg-white/90"
+            className="w-full dark:bg-white dark:text-black dark:hover:bg-white/90"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path
