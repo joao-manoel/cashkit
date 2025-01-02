@@ -30,7 +30,6 @@ export async function getTransactions(app: FastifyInstance) {
             walletId: z.string(),
           }),
           body: z.object({
-            take: z.number(),
             year: z.string(),
             month: z.string(),
           }),
@@ -73,7 +72,7 @@ export async function getTransactions(app: FastifyInstance) {
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
         const { walletId } = request.params
-        const { take, month, year } = request.body
+        const { month, year } = request.body
 
         const wallet = await prisma.wallet.findFirst({
           where: {
@@ -155,7 +154,6 @@ export async function getTransactions(app: FastifyInstance) {
           orderBy: {
             payDate: 'desc',
           },
-          take: Number(take),
         })
 
         const timeZone = 'UTC' // Definindo UTC para consistência

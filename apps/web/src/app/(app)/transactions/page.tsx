@@ -1,49 +1,50 @@
-import { isMatch } from 'date-fns'
-import { redirect } from 'next/navigation'
+'use client'
 
-import { MonthYearDropdown } from '@/components/month-year-dropdown'
+import { useEffect, useState } from 'react'
+
+import { Transactions } from '@/@types/transactions-types'
+import { Breadcrumb } from '@/components/breadcrumbs'
+import { DateDropdown } from '@/components/date-dropdown'
+import { useDate } from '@/context/date-context' // Importando o contexto
 import { getTransactions } from '@/http/get-transactions'
-import { getWallet } from '@/http/get-wallet'
+import { getWallet, GetWalletResponse } from '@/http/get-wallet'
 
 import { TransactionsTable } from './transactions-table'
 
-interface TransactionsProps {
-  searchParams: { month: string; year: string }
-}
+export default function TransactionsPage() {
+  const { month, year } = useDate() // Usando o mês e ano do contexto
+  const [wallet, setWallet] = useState<GetWalletResponse | null>(null)
+  const [transactions, setTransactions] = useState<Transactions[] | []>([])
 
-export default async function TransactionsPage({
-  searchParams: { month, year },
-}: TransactionsProps) {
-  const monthIsInvalid = !month || !isMatch(month, 'MM')
+  useEffect(() => {
+    const fetchData = async () => {
+      const walletData = await getWallet()
+      setWallet(walletData)
 
-  const date = new Date()
+      if (walletData) {
+        const transactionsData = await getTransactions({
+          walletId: walletData.id,
+          month: month.toString(),
+          year: year.toString(),
+        })
+        setTransactions(transactionsData)
+      }
+    }
 
-  const currentMonth =
-    date.getMonth() < 10 ? `0${date.getMonth() + 1}` : date.getMonth() + 1
+    fetchData()
+  }, [month, year])
 
-  if (monthIsInvalid) {
-    redirect(`?month=${currentMonth}&year=${date.getFullYear().toString()}`)
-  }
-
-  const wallet = await getWallet()
-
-  const transactions = await getTransactions({
-    walletId: wallet.id,
-    month,
-    year,
-    take: 100,
-  })
+  if (!wallet || !transactions.length) return <p>Carregando...</p>
 
   return (
-    <div className="container-wrapper">
-      <div className="container p-4">
-        <header className="flex items-center justify-between">
-          <h1 className="text-lg font-bold">Transações</h1>
-          <MonthYearDropdown />
-        </header>
-        <div>
-          <TransactionsTable initialTransactions={transactions} />
-        </div>
+    <div>
+      <Breadcrumb />
+      <header className="mt-4 flex items-center justify-between">
+        <h1 className="text-lg font-bold">Transações</h1>
+        <DateDropdown />
+      </header>
+      <div>
+        <TransactionsTable initialTransactions={transactions} />
       </div>
     </div>
   )

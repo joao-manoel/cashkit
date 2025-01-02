@@ -6,8 +6,7 @@ import {
   ChevronLeft,
   ChevronRight,
 } from 'lucide-react'
-import { redirect } from 'next/navigation'
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -15,6 +14,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useDate } from '@/context/date-context' // Usando o contexto
 
 const months = [
   'Janeiro',
@@ -31,10 +31,9 @@ const months = [
   'Dezembro',
 ]
 
-export function MonthYearDropdown() {
+export function DateDropdown() {
+  const { month, year, setMonth, setYear } = useDate() // Usando o contexto
   const currentYear = new Date().getFullYear()
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth())
-  const [selectedYear, setSelectedYear] = useState(currentYear)
   const [viewYear, setViewYear] = useState(currentYear)
 
   const handleYearChange = (increment: number) => {
@@ -42,9 +41,9 @@ export function MonthYearDropdown() {
   }
 
   const handleMonthSelect = (monthIndex: number) => {
-    setSelectedMonth(monthIndex)
-    setSelectedYear(viewYear)
-    redirect(`?month=${monthIndex + 1}&year=${viewYear}`)
+    const newMonth = monthIndex + 1 // Corrigido aqui, para garantir que o mês seja o correto
+    setMonth(newMonth) // Atualiza o mês no contexto
+    setYear(viewYear) // Atualiza o ano no contexto
   }
 
   return (
@@ -56,11 +55,11 @@ export function MonthYearDropdown() {
         >
           <CalendarDays />
           <span className="flex flex-col text-sm font-medium lg:flex-row lg:gap-2">
-            <span className="text-xs font-light lg:hidden">{selectedYear}</span>
-            <span className="">{months[selectedMonth]} </span>
+            <span className="text-xs font-light lg:hidden">{year}</span>
+            <span>{months[month - 1]}</span>{' '}
             <span className="hidden lg:block">de</span>
             <span className="hidden text-xs font-light lg:block lg:text-sm lg:font-medium">
-              {selectedYear}
+              {year}
             </span>
           </span>
           <ChevronDown className="h-4 w-4 opacity-50" />
@@ -85,22 +84,22 @@ export function MonthYearDropdown() {
           </Button>
         </div>
         <div className="grid grid-cols-3 gap-1 p-2">
-          {months.map((month, index) => (
+          {months.map((m, index) => (
             <Button
-              key={month}
+              key={m}
               variant={
-                selectedMonth === index && selectedYear === viewYear
+                months[Number(month - 1)] === months[index] && viewYear === year
                   ? 'default'
                   : 'ghost'
               }
               className={`justify-center font-normal ${
-                selectedMonth === index && selectedYear === viewYear
+                months[Number(month - 1)] === months[index] && viewYear === year
                   ? 'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground'
                   : ''
               }`}
-              onClick={() => handleMonthSelect(index)}
+              onClick={() => handleMonthSelect(index)} // Ao clicar, chama handleMonthSelect
             >
-              {month}
+              {m}
             </Button>
           ))}
         </div>

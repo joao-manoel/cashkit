@@ -18,7 +18,11 @@ export default async function AuthLayout({
         <div className="w-[80px] md:w-[80px] lg:w-[240px] xl:w-[250px]">
           <NavBar />
         </div>
-        <div className="w-full overflow-scroll">{children}</div>
+        <div className="w-full overflow-scroll">
+          <div className="container-wrapper">
+            <div className="container p-4">{children}</div>
+          </div>
+        </div>
       </div>
     </div>
   )

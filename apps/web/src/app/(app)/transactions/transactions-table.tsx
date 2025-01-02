@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from 'react'
 
 import { Transactions } from '@/@types/transactions-types'
+import { CardIcon } from '@/components/card-icons'
 import CreateTransactionButton from '@/components/create-transactions-button'
 import InfoCard from '@/components/info-card'
 import {
@@ -46,6 +47,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { translate } from '@/utils/translate'
 
 interface TransactionTableProps {
   initialTransactions: Transactions[]
@@ -66,6 +68,10 @@ export function TransactionsTable({
   >('ALL')
 
   useEffect(() => {
+    setTransactions(initialTransactions)
+  }, [initialTransactions])
+
+  useEffect(() => {
     const filtered = transactions.filter(
       (transaction) =>
         (transaction.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -75,7 +81,7 @@ export function TransactionsTable({
         (typeFilter === 'ALL' || transaction.type === typeFilter),
     )
     setFilteredTransactions(filtered)
-  }, [searchTerm, transactions, typeFilter])
+  }, [searchTerm, typeFilter, transactions])
 
   const handleCheckboxChange = (transactionId: string) => {
     setSelectedTransactions((prev) =>
@@ -331,17 +337,23 @@ export function TransactionsTable({
                 }).format(transaction.amount / 100)}
               </TableCell>
               <TableCell className="text-center">
-                {transaction.status}
-              </TableCell>
-              <TableCell className="text-center">{transaction.type}</TableCell>
-              <TableCell className="text-center">
-                {transaction.payDate}
+                {translate(transaction.status)}
               </TableCell>
               <TableCell className="text-center">
-                {transaction.card.name}
+                {translate(transaction.type)}
+              </TableCell>
+              <TableCell className="text-center capitalize">
+                {new Intl.DateTimeFormat('pt-BR', {
+                  day: '2-digit',
+                  month: 'long',
+                }).format(new Date(transaction.payDate))}
+              </TableCell>
+              <TableCell className="flex items-center justify-center gap-2 text-center">
+                {CardIcon(transaction.card.brand)}
+                <span>{transaction.card.name}</span>
               </TableCell>
               <TableCell className="text-center">
-                {transaction.recurrence}
+                {translate(transaction.recurrence)}
               </TableCell>
             </TableRow>
           ))}

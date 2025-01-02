@@ -1,14 +1,14 @@
-import { MonthYearDropdown } from '@/components/month-year-dropdown'
+import { Breadcrumb } from '@/components/breadcrumbs'
+import { DateDropdown } from '@/components/date-dropdown'
 
 export default function HomePage() {
   return (
-    <div className="container-wrapper">
-      <div className="container p-4">
-        <header className="flex items-center justify-between">
-          <h1 className="text-lg font-bold">Dashboard</h1>
-          <MonthYearDropdown />
-        </header>
-      </div>
-    </div>
+    <>
+      <Breadcrumb />
+      <header className="mt-4 flex items-center justify-between">
+        <h1 className="text-lg font-bold">Home</h1>
+        <DateDropdown />
+      </header>
+    </>
   )
 }
