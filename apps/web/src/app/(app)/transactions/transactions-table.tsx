@@ -7,14 +7,17 @@ import {
   CircleCheck,
   CircleDashed,
   CircleFadingArrowUp,
+  Edit,
   Filter,
   PiggyBank,
   Search,
   Trash,
+  Trash2,
   Wallet,
   X,
 } from 'lucide-react'
 import React, { useEffect, useState } from 'react'
+import { toast } from 'sonner'
 
 import { Transactions } from '@/@types/transactions-types'
 import { CardIcon } from '@/components/card-icons'
@@ -35,6 +38,13 @@ import {
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -136,6 +146,25 @@ export function TransactionsTable({ data }: TransactionTableProps) {
     )
     setSelectedTransactions([])
     setIsDeleteDialogOpen(false)
+    toast('Transações Deletadas', {
+      description: `Todas Transações selecionada foram deletadas.`,
+    })
+  }
+
+  const handleOneDelete = (id: string) => {
+    setTransactions(transactions.filter((t) => t.id !== id))
+    toast('Transação Deletada', {
+      description: `Transação do id ${id} foi deletada.`,
+    })
+  }
+
+  const handleUpdateStatus = (id: string, newStatus: 'paid' | 'pending') => {
+    setTransactions(
+      transactions.map((t) => (t.id === id ? { ...t, status: newStatus } : t)),
+    )
+    toast('Status updated', {
+      description: `Transaction status changed to ${newStatus}.`,
+    })
   }
 
   const totalDespesasPedent = transactions
@@ -341,54 +370,98 @@ export function TransactionsTable({ data }: TransactionTableProps) {
         </TableHeader>
         <TableBody>
           {filteredTransactions.map((transaction) => (
-            <TableRow key={transaction.id}>
-              <TableCell>
-                <Checkbox
-                  checked={selectedTransactions.includes(transaction.id)}
-                  onCheckedChange={() => handleCheckboxChange(transaction.id)}
-                />
-              </TableCell>
-              <TableCell className="font-medium">{transaction.title}</TableCell>
-              <TableCell className="text-center">
-                {Intl.NumberFormat('pt-BR', {
-                  style: 'currency',
-                  currency: 'BRL',
-                }).format(transaction.amount / 100)}
-              </TableCell>
-              <TableCell className="flex items-center justify-center gap-2 text-center">
-                {transaction.status === 'paid' ? (
-                  <CircleCheck className="size-4 text-green-500" />
-                ) : (
-                  <StatusPendentIcon dueDate={new Date(transaction.payDate)} />
-                )}
-                <span>{translate(transaction.status)}</span>
-              </TableCell>
-              <TableCell className="text-center">
-                <Badge
-                  variant={
-                    transaction.type === 'INCOME' ? 'success' : 'destructive'
-                  }
-                >
-                  {translate(transaction.type)}
-                </Badge>
-              </TableCell>
-              <TableCell className="text-center">
-                {new Intl.DateTimeFormat('pt-BR', {
-                  day: '2-digit',
-                }).format(new Date(transaction.payDate))}{' '}
-                de <span className="capitalize">{months[month - 1]}</span>
-              </TableCell>
+            <ContextMenu key={transaction.id}>
+              <ContextMenuTrigger asChild>
+                <TableRow key={transaction.id}>
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedTransactions.includes(transaction.id)}
+                      onCheckedChange={() =>
+                        handleCheckboxChange(transaction.id)
+                      }
+                    />
+                  </TableCell>
+                  <TableCell className="font-medium">
+                    {transaction.title}
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {Intl.NumberFormat('pt-BR', {
+                      style: 'currency',
+                      currency: 'BRL',
+                    }).format(transaction.amount / 100)}
+                  </TableCell>
+                  <TableCell className="flex items-center justify-center gap-2 text-center">
+                    {transaction.status === 'paid' ? (
+                      <CircleCheck className="size-4 text-green-500" />
+                    ) : (
+                      <StatusPendentIcon
+                        dueDate={new Date(transaction.payDate)}
+                      />
+                    )}
+                    <span>{translate(transaction.status)}</span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <Badge
+                      variant={
+                        transaction.type === 'INCOME'
+                          ? 'success'
+                          : 'destructive'
+                      }
+                    >
+                      {translate(transaction.type)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {new Intl.DateTimeFormat('pt-BR', {
+                      day: '2-digit',
+                    }).format(new Date(transaction.payDate))}{' '}
+                    de <span className="capitalize">{months[month - 1]}</span>
+                  </TableCell>
 
-              <TableCell className="flex items-center justify-center gap-2 text-center">
-                {CardIcon(transaction.card.brand)}
-                <span>{transaction.card.name}</span>
-              </TableCell>
-              <TableCell className="text-center">
-                <div className="flex items-center justify-start gap-2">
-                  <span>{translate(transaction.categorys.title)}</span>
-                </div>
-              </TableCell>
-            </TableRow>
+                  <TableCell className="flex items-center justify-center gap-2 text-center">
+                    {CardIcon(transaction.card.brand)}
+                    <span>{transaction.card.name}</span>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    <div className="flex items-center justify-start gap-2">
+                      <span>{translate(transaction.categorys.title)}</span>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              </ContextMenuTrigger>
+              <ContextMenuContent>
+                <ContextMenuItem onClick={() => console.log(transaction.id)}>
+                  <Edit className="mr-2 h-4 w-4" />
+                  Editar
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onClick={() => handleOneDelete(transaction.id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Deletar
+                </ContextMenuItem>
+                <ContextMenuSeparator />
+                {transaction.status === 'pending' ? (
+                  <ContextMenuItem
+                    onClick={() => console.log(transaction.id, 'paid')}
+                    className="flex gap-2"
+                  >
+                    <CircleCheck className="size-4 text-green-500" />
+                    Pagar
+                  </ContextMenuItem>
+                ) : (
+                  <ContextMenuItem
+                    onClick={() =>
+                      handleUpdateStatus(transaction.id, 'pending')
+                    }
+                    className="flex gap-2"
+                  >
+                    <CircleDashed className={`size-4 text-yellow-500`} />
+                    Pendente
+                  </ContextMenuItem>
+                )}
+              </ContextMenuContent>
+            </ContextMenu>
           ))}
         </TableBody>
       </Table>

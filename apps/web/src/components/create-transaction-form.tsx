@@ -3,6 +3,7 @@ import { format, startOfToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { AlertTriangle, CalendarIcon, Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
+import { toast } from 'sonner'
 
 import { createTransactionAction } from '@/app/(app)/transactions/actions'
 import { CardIcon } from '@/components/card-icons'
@@ -108,6 +109,7 @@ export default function CreateIncomeForm({
   const [{ errors, message, success }, handleSubmit, isPending] = useFormState(
     createTransactionAction,
     () => {
+      toast.success(`Transação ${title} criada com sucesso.`)
       setTitle('')
       setAmount('')
       setDate(startOfToday())

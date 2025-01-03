@@ -4,6 +4,7 @@ import type { Metadata } from 'next'
 import { Roboto } from 'next/font/google'
 
 import Header from '@/components/header'
+import { Toaster } from '@/components/ui/sonner'
 
 import Providers from './providers'
 
@@ -30,6 +31,7 @@ export default function RootLayout({
         <Providers>
           <Header />
           {children}
+          <Toaster richColors />
         </Providers>
       </body>
     </html>
