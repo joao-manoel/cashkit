@@ -50,7 +50,7 @@ export default function CreateTransactionButton() {
         <Button
           variant="outline"
           size="sm"
-          className="flex h-[40px] items-center bg-blue-700 text-white hover:bg-blue-800 dark:bg-blue-700"
+          className="flex h-[40px] items-center bg-blue-700 text-white hover:bg-blue-800 hover:text-white dark:bg-blue-700"
         >
           <PlusCircle />
           <span className="hidden lg:block">Nova Transação</span>

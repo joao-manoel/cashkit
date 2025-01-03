@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 
 import { Breadcrumb } from '@/components/breadcrumbs'
 import { DateDropdown } from '@/components/date-dropdown'
+import TransactionSkeleton from '@/components/transaction-skeleton'
 import { useDate } from '@/context/date-context' // Importando o contexto
 import { getTransactions } from '@/http/get-transactions'
 import { getWallet, GetWalletResponse } from '@/http/get-wallet'
@@ -39,7 +40,6 @@ export default function TransactionsPage() {
     enabled: !!wallet, // Apenas busca transações se a carteira estiver disponível
   })
 
-  if (isWalletLoading || isTransactionsLoading) return <p>Carregando...</p>
   if (walletError || transactionsError) return <p>Erro ao carregar dados.</p>
 
   return (
@@ -50,7 +50,11 @@ export default function TransactionsPage() {
         <DateDropdown />
       </header>
       <div>
-        <TransactionsTable data={transactions || []} />
+        {isTransactionsLoading || isWalletLoading ? (
+          <TransactionSkeleton />
+        ) : (
+          <TransactionsTable data={transactions || []} />
+        )}
       </div>
     </div>
   )
