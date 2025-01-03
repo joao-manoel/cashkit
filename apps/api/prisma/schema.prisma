@@ -43,6 +43,7 @@ model AuthCode {
   id        String   @id @default(uuid())
   code      Int      @unique
   createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
   attempts  Int      @map("attempts")
   expiresAt DateTime
 
@@ -158,9 +159,9 @@ model Transaction {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  Installments Installments[]
-  Categorys    Categorys?     @relation(fields: [categorysId], references: [id])
-  categorysId  String?
+  installments Installments[]
+  categorys    Categorys      @relation(fields: [categoryId], references: [id])
+  categoryId   String
 
   @@map("transactions")
 }

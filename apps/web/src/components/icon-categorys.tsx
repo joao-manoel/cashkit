@@ -8,6 +8,7 @@ import {
   GraduationCap,
   Heart,
   Home,
+  House,
   LucideProps, // Importando o tipo LucideProps para estender as propriedades do ícone
   Music,
   ShoppingCart,
@@ -29,6 +30,8 @@ export const CategoryIcon: React.FC<CategoryIconProps> = ({
   ...props
 }) => {
   switch (icon) {
+    case 'MORADIA':
+      return <House {...props} />
     case 'FOOD':
       return <Utensils {...props} />
     case 'TRANSPORT':

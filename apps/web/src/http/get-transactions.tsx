@@ -20,7 +20,7 @@ export async function getTransactions({
         year,
       },
       next: {
-        tags: [`${walletId}/transactions`],
+        tags: [`transactions`],
       },
     })
     .json<Transactions[]>()

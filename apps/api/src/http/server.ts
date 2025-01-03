@@ -14,9 +14,11 @@ import { authenticateWithGoogle } from './routes/auth/authenticate-with-google'
 import { getProfile } from './routes/auth/get-profile'
 import { requestAuthCode } from './routes/auth/request-auth-code'
 import { createCard } from './routes/cards/create-card'
+import { getTransactionsCategorys } from './routes/categorys/get-transactions-categorys'
+import { createTransaction } from './routes/transactions/create-transaction'
+import { getTransactions } from './routes/transactions/get-transactions'
 import { createWallet } from './routes/wallets/create-wallet'
 import { getWallet } from './routes/wallets/get-wallet'
-import { getTransactions } from './routes/wallets/transactions/get-transactions'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -39,6 +41,9 @@ app.register(getWallet)
 app.register(createCard)
 
 app.register(getTransactions)
+app.register(createTransaction)
+
+app.register(getTransactionsCategorys)
 
 errorHandler(app)
 

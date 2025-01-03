@@ -42,6 +42,11 @@ export async function getTransactions(app: FastifyInstance) {
                 type: z.nativeEnum(TransactionType),
                 payDate: z.string(),
                 recurrence: z.nativeEnum(RecurrenceType),
+                categorys: z.object({
+                  id: z.string().uuid(),
+                  title: z.string(),
+                  icon: z.string(),
+                }),
                 status: z.nativeEnum(TransactionStatusType),
                 card: z.object({
                   id: z.string().uuid(),
@@ -96,6 +101,13 @@ export async function getTransactions(app: FastifyInstance) {
             recurrence: true,
             type: true,
             payDate: true,
+            categorys: {
+              select: {
+                id: true,
+                title: true,
+                icon: true,
+              },
+            },
             card: {
               select: {
                 id: true,
@@ -109,7 +121,7 @@ export async function getTransactions(app: FastifyInstance) {
                 name: true,
               },
             },
-            Installments: {
+            installments: {
               select: {
                 id: true,
                 installment: true,
@@ -140,7 +152,7 @@ export async function getTransactions(app: FastifyInstance) {
               },
               {
                 recurrence: 'VARIABLE',
-                Installments: {
+                installments: {
                   some: {
                     payDate: {
                       gte: startOfMonth,
@@ -170,7 +182,7 @@ export async function getTransactions(app: FastifyInstance) {
                   toZonedTime(transaction.payDate, timeZone),
                   'yyyy/MM/dd',
                 ),
-          installments: transaction.Installments?.map((installment) => ({
+          installments: transaction.installments?.map((installment) => ({
             ...installment,
             payDate: installment.payDate
               ? format(

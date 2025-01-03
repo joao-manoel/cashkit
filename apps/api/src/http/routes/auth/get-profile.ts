@@ -1,3 +1,4 @@
+import { BrandCardType } from '@prisma/client'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -24,6 +25,14 @@ export async function getProfile(app: FastifyInstance) {
                 name: z.string().nullable(),
                 avatar: z.string().nullish(),
                 email: z.string().email().nullable(),
+                card: z.array(
+                  z.object({
+                    id: z.string().uuid(),
+                    name: z.string(),
+                    brand: z.nativeEnum(BrandCardType),
+                    limit: z.number(),
+                  }),
+                ),
               }),
             }),
           },
@@ -38,6 +47,14 @@ export async function getProfile(app: FastifyInstance) {
             name: true,
             email: true,
             avatarUrl: true,
+            Card: {
+              select: {
+                id: true,
+                name: true,
+                brand: true,
+                limit: true,
+              },
+            },
           },
           where: {
             id: userId,
@@ -54,6 +71,7 @@ export async function getProfile(app: FastifyInstance) {
             name: user.name,
             email: user.email,
             avatar: user.avatarUrl,
+            card: user.Card,
           },
         })
       },

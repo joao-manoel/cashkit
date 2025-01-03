@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   CircleArrowDown,
   CircleArrowUp,
+  CircleCheck,
   CircleDashed,
   CircleFadingArrowUp,
   Filter,
@@ -19,6 +20,7 @@ import { Transactions } from '@/@types/transactions-types'
 import { CardIcon } from '@/components/card-icons'
 import CreateTransactionButton from '@/components/create-transactions-button'
 import InfoCard from '@/components/info-card'
+import StatusPendentIcon from '@/components/status-pendent-icon'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +32,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
+import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
 import {
@@ -47,17 +50,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useDate } from '@/context/date-context'
 import { translate } from '@/utils/translate'
+import { months } from '@/utils/utils'
 
 interface TransactionTableProps {
-  initialTransactions: Transactions[]
+  data: Transactions[]
 }
 
-export function TransactionsTable({
-  initialTransactions,
-}: TransactionTableProps) {
-  const [transactions, setTransactions] =
-    useState<Transactions[]>(initialTransactions)
+export function TransactionsTable({ data }: TransactionTableProps) {
+  const { month } = useDate()
+  const [transactions, setTransactions] = useState<Transactions[]>(data)
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredTransactions, setFilteredTransactions] =
@@ -68,18 +71,33 @@ export function TransactionsTable({
   >('ALL')
 
   useEffect(() => {
-    setTransactions(initialTransactions)
-  }, [initialTransactions])
+    setTransactions(data)
+  }, [data])
 
   useEffect(() => {
-    const filtered = transactions.filter(
-      (transaction) =>
-        (transaction.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          transaction.card.name
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())) &&
-        (typeFilter === 'ALL' || transaction.type === typeFilter),
-    )
+    const filtered = transactions
+      .filter(
+        (transaction) =>
+          (transaction.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            transaction.card.name
+              .toLowerCase()
+              .includes(searchTerm.toLowerCase())) &&
+          (typeFilter === 'ALL' || transaction.type === typeFilter),
+      )
+      // Ordenando as transações para que as com status 'pending' apareçam primeiro, e depois por payDate (do mais antigo para o mais recente)
+      .sort((a, b) => {
+        // Primeiro, verifica se o status é 'pending'
+        if (a.status === 'pending' && b.status !== 'pending') return -1 // 'pending' vem primeiro
+        if (a.status !== 'pending' && b.status === 'pending') return 1 // 'pending' vem primeiro
+
+        // Se o status for igual, ordena pela data de pagamento (payDate) do mais antigo para o mais recente
+        const dateA = new Date(a.payDate)
+        const dateB = new Date(b.payDate)
+
+        // Ordena do mais antigo para o mais recente
+        return dateA.getTime() - dateB.getTime()
+      })
+
     setFilteredTransactions(filtered)
   }, [searchTerm, typeFilter, transactions])
 
@@ -107,6 +125,7 @@ export function TransactionsTable({
           : transaction,
       ),
     )
+    setSelectedTransactions([])
   }
 
   const handleDelete = () => {
@@ -137,7 +156,7 @@ export function TransactionsTable({
       .reduce((sum, t) => sum + t.amount, 0) - totalDespesasPaid
 
   return (
-    <div className="mt-4 space-y-4">
+    <div className="mt-4 space-y-4 pb-10">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <InfoCard
           amount={total}
@@ -284,16 +303,16 @@ export function TransactionsTable({
           <CreateTransactionButton />
         </div>
       </div>
-      <div className="flex items-center gap-2 pl-2 text-xs">
+      <div className="flex items-center gap-1 text-xs">
         {typeFilter !== 'ALL' && (
           <Button
             size="sm"
-            className="min-w-19 h-6 rounded-md p-1 text-[10px] text-zinc-700 outline-dashed outline-zinc-800"
+            className="min-w-19 h-6 rounded-md p-1 pr-2 text-[10px] text-zinc-700 outline-dashed outline-zinc-800"
             variant="ghost"
             onClick={() => setTypeFilter('ALL')}
           >
             <X className="size-1" />
-            <span className="">{typeFilter}</span>
+            <span className="">{translate(typeFilter)}s</span>
           </Button>
         )}
       </div>
@@ -317,7 +336,7 @@ export function TransactionsTable({
             <TableHead className="text-center">Tipo</TableHead>
             <TableHead className="text-center">Vencimento</TableHead>
             <TableHead className="text-center">Forma de Pagamento</TableHead>
-            <TableHead className="text-center">Recorrência</TableHead>
+            <TableHead className="">Categoria</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -336,24 +355,38 @@ export function TransactionsTable({
                   currency: 'BRL',
                 }).format(transaction.amount / 100)}
               </TableCell>
-              <TableCell className="text-center">
-                {translate(transaction.status)}
+              <TableCell className="flex items-center justify-center gap-2 text-center">
+                {transaction.status === 'paid' ? (
+                  <CircleCheck className="size-4 text-green-500" />
+                ) : (
+                  <StatusPendentIcon dueDate={new Date(transaction.payDate)} />
+                )}
+                <span>{translate(transaction.status)}</span>
               </TableCell>
               <TableCell className="text-center">
-                {translate(transaction.type)}
+                <Badge
+                  variant={
+                    transaction.type === 'INCOME' ? 'success' : 'destructive'
+                  }
+                >
+                  {translate(transaction.type)}
+                </Badge>
               </TableCell>
-              <TableCell className="text-center capitalize">
+              <TableCell className="text-center">
                 {new Intl.DateTimeFormat('pt-BR', {
                   day: '2-digit',
-                  month: 'long',
-                }).format(new Date(transaction.payDate))}
+                }).format(new Date(transaction.payDate))}{' '}
+                de <span className="capitalize">{months[month - 1]}</span>
               </TableCell>
+
               <TableCell className="flex items-center justify-center gap-2 text-center">
                 {CardIcon(transaction.card.brand)}
                 <span>{transaction.card.name}</span>
               </TableCell>
               <TableCell className="text-center">
-                {translate(transaction.recurrence)}
+                <div className="flex items-center justify-start gap-2">
+                  <span>{translate(transaction.categorys.title)}</span>
+                </div>
               </TableCell>
             </TableRow>
           ))}

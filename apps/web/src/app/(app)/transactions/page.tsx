@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 
-import { Transactions } from '@/@types/transactions-types'
 import { Breadcrumb } from '@/components/breadcrumbs'
 import { DateDropdown } from '@/components/date-dropdown'
 import { useDate } from '@/context/date-context' // Importando o contexto
@@ -12,29 +11,36 @@ import { getWallet, GetWalletResponse } from '@/http/get-wallet'
 import { TransactionsTable } from './transactions-table'
 
 export default function TransactionsPage() {
-  const { month, year } = useDate() // Usando o mês e ano do contexto
-  const [wallet, setWallet] = useState<GetWalletResponse | null>(null)
-  const [transactions, setTransactions] = useState<Transactions[] | []>([])
+  const { month, year } = useDate()
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const walletData = await getWallet()
-      setWallet(walletData)
+  // Fetch para a carteira
+  const {
+    data: wallet,
+    isLoading: isWalletLoading,
+    error: walletError,
+  } = useQuery<GetWalletResponse, Error>({
+    queryKey: ['wallet'],
+    queryFn: getWallet,
+  })
 
-      if (walletData) {
-        const transactionsData = await getTransactions({
-          walletId: walletData.id,
-          month: month.toString(),
-          year: year.toString(),
-        })
-        setTransactions(transactionsData)
-      }
-    }
+  // Fetch para as transações
+  const {
+    data: transactions,
+    isLoading: isTransactionsLoading,
+    error: transactionsError,
+  } = useQuery({
+    queryKey: ['transactions', wallet?.id, month, year],
+    queryFn: () =>
+      getTransactions({
+        walletId: wallet!.id,
+        month: month.toString(),
+        year: year.toString(),
+      }),
+    enabled: !!wallet, // Apenas busca transações se a carteira estiver disponível
+  })
 
-    fetchData()
-  }, [month, year])
-
-  if (!wallet || !transactions.length) return <p>Carregando...</p>
+  if (isWalletLoading || isTransactionsLoading) return <p>Carregando...</p>
+  if (walletError || transactionsError) return <p>Erro ao carregar dados.</p>
 
   return (
     <div>
@@ -44,7 +50,7 @@ export default function TransactionsPage() {
         <DateDropdown />
       </header>
       <div>
-        <TransactionsTable initialTransactions={transactions} />
+        <TransactionsTable data={transactions || []} />
       </div>
     </div>
   )

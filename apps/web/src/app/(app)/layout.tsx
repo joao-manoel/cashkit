@@ -15,9 +15,7 @@ export default async function AuthLayout({
   return (
     <div className="h-screen">
       <div className="flex h-full">
-        <div className="w-[80px] md:w-[80px] lg:w-[240px] xl:w-[250px]">
-          <NavBar />
-        </div>
+        <NavBar />
         <div className="w-full overflow-scroll">
           <div className="container-wrapper">
             <div className="container p-4">{children}</div>

@@ -1,8 +1,11 @@
 'use client'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { ReactNode } from 'react'
 
 import { DateProvider } from '@/context/date-context'
+import { MenuProvider } from '@/context/menu-context'
+import { queryClient } from '@/lib/react-query'
 
 export default function Providers({ children }: { children: ReactNode }) {
   return (
@@ -11,7 +14,11 @@ export default function Providers({ children }: { children: ReactNode }) {
       defaultTheme="dark"
       disableTransitionOnChange
     >
-      <DateProvider>{children}</DateProvider>
+      <QueryClientProvider client={queryClient}>
+        <DateProvider>
+          <MenuProvider>{children}</MenuProvider>
+        </DateProvider>
+      </QueryClientProvider>
     </ThemeProvider>
   )
 }

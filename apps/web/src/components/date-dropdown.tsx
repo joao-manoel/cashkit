@@ -15,21 +15,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useDate } from '@/context/date-context' // Usando o contexto
-
-const months = [
-  'Janeiro',
-  'Fevereiro',
-  'Março',
-  'Abril',
-  'Maio',
-  'Junho',
-  'Julho',
-  'Agosto',
-  'Setembro',
-  'Outubro',
-  'Novembro',
-  'Dezembro',
-]
+import { months } from '@/utils/utils'
 
 export function DateDropdown() {
   const { month, year, setMonth, setYear } = useDate() // Usando o contexto
@@ -94,7 +80,7 @@ export function DateDropdown() {
               }
               className={`justify-center font-normal ${
                 months[Number(month - 1)] === months[index] && viewYear === year
-                  ? 'bg-primary text-primary-foreground dark:bg-primary dark:text-primary-foreground'
+                  ? 'bg-primary/20 text-primary hover:bg-primary/20 hover:text-primary dark:bg-primary dark:text-primary-foreground'
                   : ''
               }`}
               onClick={() => handleMonthSelect(index)} // Ao clicar, chama handleMonthSelect

@@ -14,6 +14,7 @@ export type Transactions = {
   status: 'paid' | 'pending'
   card: { id: string; name: string; brand: string }
   wallet: { id: string; name: string }
+  categorys: { id: string; title: string; icon: string }
   installments: Array<{
     id: string
     installment: number

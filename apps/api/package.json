@@ -40,6 +40,9 @@
   "author": "joao-manoel",
   "license": "ISC",
   "prettier": "@ck/prettier",
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "eslintConfig": {
     "extends": [
       "@ck/eslint-config/node"

@@ -1,4 +1,12 @@
 import { PlusCircle } from 'lucide-react'
+import { useEffect, useState } from 'react'
+
+import { CardType, getProfile } from '@/http/get-profile'
+import {
+  getTransactionsCategorys,
+  GetTransactionsCategorysResponse,
+} from '@/http/get-transactions-categorys'
+import { getWallet, GetWalletResponse } from '@/http/get-wallet'
 
 import CreateIncomeForm from './create-transaction-form'
 import { Button } from './ui/button'
@@ -11,6 +19,31 @@ import {
 } from './ui/dialog'
 
 export default function CreateTransactionButton() {
+  const [wallet, setWallet] = useState<GetWalletResponse | null>(null)
+  const [cards, setCards] = useState<CardType[] | null>(null)
+  const [categorys, setCategorys] = useState<
+    GetTransactionsCategorysResponse[] | null
+  >(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const walletData = await getWallet()
+      setWallet(walletData)
+
+      const categorysData = await getTransactionsCategorys()
+      setCategorys(categorysData)
+
+      const getProfileData = await getProfile()
+      setCards(getProfileData.user.card)
+    }
+
+    fetchData()
+  }, [])
+
+  if (!categorys || !wallet || !cards) {
+    return <p>Carregando...</p>
+  }
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -29,7 +62,7 @@ export default function CreateTransactionButton() {
           <p className="text-2xl font-bold">Adiciona transação</p>
           <DialogDescription>Adicionar uma nova transação.</DialogDescription>
         </DialogTitle>
-        <CreateIncomeForm />
+        <CreateIncomeForm wallet={wallet} categorys={categorys} cards={cards} />
       </DialogContent>
     </Dialog>
   )

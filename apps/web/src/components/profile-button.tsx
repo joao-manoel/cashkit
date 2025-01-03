@@ -36,7 +36,7 @@ export default async function ProfileButton() {
       <DropdownMenuContent align="end" className="mt-6 w-[354px] bg-muted">
         <DropdownMenuItem
           asChild
-          className="flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-zinc-200 dark:hover:bg-black"
+          className="flex cursor-pointer items-center justify-between p-4 transition-colors hover:bg-zinc-200 dark:hover:bg-black/10"
         >
           <Link href="/account">
             <div className="flex gap-2">
@@ -69,11 +69,11 @@ export default async function ProfileButton() {
         <Separator />
         <DropdownMenuItem
           asChild
-          className="cursor-pointer p-4 transition-colors hover:bg-zinc-200 hover:text-red-400 dark:hover:bg-black"
+          className="cursor-pointer p-4 transition-colors hover:bg-zinc-200 hover:text-red-400 dark:hover:bg-black/10"
         >
           <a
             href="/api/auth/sign-out"
-            className="text-red-400 hover:text-red-400"
+            className="text-red-400 dark:hover:text-red-400"
           >
             <LogOut />
             <span className="font-bold">Sair da conta</span>

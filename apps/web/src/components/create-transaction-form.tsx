@@ -6,7 +6,6 @@ import { useMemo, useState } from 'react'
 
 import { createTransactionAction } from '@/app/(app)/transactions/actions'
 import { CardIcon } from '@/components/card-icons'
-import CategoryIcon from '@/components/icon-categorys'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -25,13 +24,28 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useFormState } from '@/hooks/use-form-state'
+import { CardType } from '@/http/get-profile'
+import { GetTransactionsCategorysResponse } from '@/http/get-transactions-categorys'
+import { GetWalletResponse } from '@/http/get-wallet'
 import { cn } from '@/lib/utils'
+
+import CategoryIcon from './icon-categorys'
+
+export interface CreateIncomeFormProps {
+  wallet: GetWalletResponse
+  categorys: GetTransactionsCategorysResponse[]
+  cards: CardType[]
+}
 
 type EntryType = 'variable' | 'recorrente' | 'parcelado'
 type StatusType = 'pending' | 'paid'
 type RecurrenceType = 'MONTH' | 'YEAR'
 
-export default function CreateIncomeForm() {
+export default function CreateIncomeForm({
+  wallet,
+  cards,
+  categorys,
+}: CreateIncomeFormProps) {
   const [title, setTitle] = useState('')
   const [typeTransaction, setTypeTransaction] = useState('INCOME')
   const [payStatus, setPayStatus] = useState<StatusType>('pending')
@@ -42,6 +56,10 @@ export default function CreateIncomeForm() {
   const [entryType, setEntryType] = useState<EntryType>('variable')
   const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>('MONTH')
   const [installments, setInstallments] = useState<number>(1)
+
+  const FilterCategory = categorys.filter(
+    (category) => category.transactionType === typeTransaction,
+  )
 
   const installmentOptions = useMemo(
     () =>
@@ -136,6 +154,13 @@ export default function CreateIncomeForm() {
         <div className="grid grid-cols-[70%_minmax(30%,_1fr)] gap-3">
           <div className="gap-2 space-y-2">
             <Label htmlFor="title">Titulo</Label>
+            <input
+              type="text"
+              defaultValue={wallet.id}
+              name="walletId"
+              hidden
+              readOnly
+            />
 
             <Input
               placeholder="Digite um titulo"
@@ -143,7 +168,6 @@ export default function CreateIncomeForm() {
               name="title"
               id="title"
               value={title}
-              className="bg-background"
             />
             {errors?.title && (
               <p className="text-xs font-medium text-red-500 dark:text-red-400">
@@ -230,12 +254,22 @@ export default function CreateIncomeForm() {
                 <SelectValue placeholder="Selecione uma categoria" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Moradia" className="flex gap-2">
-                  <div className="flex items-center gap-2">
-                    <CategoryIcon icon="NUBANK" size={15} />
-                    <span>Moradia</span>
-                  </div>
-                </SelectItem>
+                {FilterCategory.length >= 1 && (
+                  <>
+                    {FilterCategory.map((c) => (
+                      <SelectItem
+                        value={c.id}
+                        key={c.id}
+                        className="flex gap-2"
+                      >
+                        <div className="flex items-center gap-2">
+                          <CategoryIcon icon={c.icon} size={15} />
+                          <span>{c.title}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                  </>
+                )}
               </SelectContent>
             </Select>
             {errors?.categoryId && (
@@ -252,6 +286,7 @@ export default function CreateIncomeForm() {
               value={format(date, 'yyyy/MM/dd', {
                 locale: ptBR,
               })}
+              readOnly
               name="payDate"
             />
             <Popover>
@@ -260,7 +295,7 @@ export default function CreateIncomeForm() {
                   type="button"
                   variant={'outline'}
                   className={cn(
-                    'w-full justify-start bg-background text-left font-normal',
+                    'w-full justify-start text-left font-normal dark:bg-background',
                     !date && 'text-muted-foreground',
                   )}
                 >
@@ -288,23 +323,36 @@ export default function CreateIncomeForm() {
         </div>
         <div className="space-y-2">
           <Label htmlFor="card">Cartão</Label>
-          <Select
-            value={card}
-            onValueChange={(value) => setCard(value)}
-            name="cardId"
-          >
-            <SelectTrigger id="card">
-              <SelectValue placeholder="Selecione um cartão" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="Nubank">
-                <div className="flex gap-2">
-                  <span>{CardIcon('NUBANK')}</span>
-                  <span>Nubank</span>
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
+          {cards ? (
+            <Select
+              value={card}
+              onValueChange={(value) => setCard(value)}
+              name="cardId"
+            >
+              <SelectTrigger id="card">
+                <SelectValue placeholder="Selecione um cartão" />
+              </SelectTrigger>
+              <SelectContent>
+                {cards.map((card) => (
+                  <SelectItem value={card.id} key={card.id}>
+                    <div className="flex gap-2">
+                      <span>{CardIcon(card.brand)}</span>
+                      <span>{card.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <span className="text-center text-sm">
+                Você não tem nenhum cartão cadastrado!
+              </span>
+              <Button variant="secondary" size="sm">
+                Cadastrar um novo cartão
+              </Button>
+            </div>
+          )}
           {errors?.cardId && (
             <p className="text-xs font-medium text-red-500 dark:text-red-400">
               {errors.cardId[0]}
@@ -319,7 +367,7 @@ export default function CreateIncomeForm() {
                 type="button"
                 variant={entryType === 'variable' ? 'default' : 'outline'}
                 onClick={() => handleEntryType('variable')}
-                className={`${entryType === 'variable' ? 'dark:bg-white dark:text-black' : ''} w-full`}
+                className="w-full"
               >
                 Único
               </Button>
@@ -327,7 +375,7 @@ export default function CreateIncomeForm() {
                 type="button"
                 variant={entryType === 'recorrente' ? 'default' : 'outline'}
                 onClick={() => handleEntryType('recorrente')}
-                className={`${entryType === 'recorrente' ? 'dark:bg-white dark:text-black' : ''} w-full`}
+                className="w-full"
               >
                 Recorrente
               </Button>
@@ -335,7 +383,7 @@ export default function CreateIncomeForm() {
                 type="button"
                 variant={entryType === 'parcelado' ? 'default' : 'outline'}
                 onClick={() => handleEntryType('parcelado')}
-                className={`${entryType === 'parcelado' ? 'dark:bg-white dark:text-black' : ''} w-full`}
+                className="w-full"
               >
                 Parcelado
               </Button>
@@ -394,7 +442,7 @@ export default function CreateIncomeForm() {
           )}
         </div>
         <div className="w-full">
-          <Button className="w-full bg-blue-700 dark:bg-blue-700">
+          <Button className="w-full">
             {isPending ? (
               <Loader2 className="size-4 animate-spin" />
             ) : (
