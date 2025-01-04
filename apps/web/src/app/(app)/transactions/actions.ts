@@ -4,6 +4,7 @@ import { z } from 'zod'
 
 import { createTransaction } from '@/http/create-transaction'
 import { deleteTransaction } from '@/http/delete-transaction'
+import { updatePaymentTransactions } from '@/http/update-payment-transactions'
 import { queryClient } from '@/lib/react-query'
 
 const createTransactionActionSchema = z.object({
@@ -174,6 +175,37 @@ export async function deleteTransactionAction({
     walletId,
     transactions,
   })
+  await queryClient.invalidateQueries({
+    queryKey: ['wallet'],
+  })
+  await queryClient.invalidateQueries({
+    queryKey: ['transactions', walletId],
+  })
+}
+
+interface UpdatePaymentTransactionsActionProps {
+  walletId: string
+  transactions: Array<{
+    id: string
+    recurrence: 'VARIABLE' | 'MONTH' | 'YEAR'
+    status?: 'paid' | 'pending'
+    payDate: string
+    paidAt?: string
+    installments?: Array<{
+      id: string
+    }>
+  }>
+}
+
+export async function updatePaymentTransactionsAction({
+  walletId,
+  transactions,
+}: UpdatePaymentTransactionsActionProps) {
+  updatePaymentTransactions({
+    walletId,
+    transactions,
+  })
+
   await queryClient.invalidateQueries({
     queryKey: ['wallet'],
   })

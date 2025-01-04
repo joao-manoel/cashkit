@@ -18,6 +18,7 @@ import { getTransactionsCategorys } from './routes/categorys/get-transactions-ca
 import { createTransaction } from './routes/transactions/create-transaction'
 import { deleteTransaction } from './routes/transactions/delete-transaction'
 import { getTransactions } from './routes/transactions/get-transactions'
+import { updatePaymentTransactions } from './routes/transactions/update-payment-transactions'
 import { createWallet } from './routes/wallets/create-wallet'
 import { getWallet } from './routes/wallets/get-wallet'
 
@@ -44,6 +45,7 @@ app.register(createCard)
 app.register(getTransactions)
 app.register(createTransaction)
 app.register(deleteTransaction)
+app.register(updatePaymentTransactions)
 
 app.register(getTransactionsCategorys)
 

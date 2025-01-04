@@ -64,7 +64,10 @@ import { useDate } from '@/context/date-context'
 import { translate } from '@/utils/translate'
 import { months } from '@/utils/utils'
 
-import { deleteTransactionAction } from './actions'
+import {
+  deleteTransactionAction,
+  updatePaymentTransactionsAction,
+} from './actions'
 import CreateTransactionButton from './create-transactions-button'
 
 interface TransactionTableProps {
@@ -86,8 +89,12 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
 
   useEffect(() => {
     const updatedTransactions = data.map((transaction) => {
-      if (transaction.installments.length > 0) {
-        // Filtra a parcela correspondente ao mês e ano
+      // Verifica se a transação é mensal ou anual e tem parcelas
+      if (
+        (transaction.recurrence === 'MONTH' ||
+          transaction.recurrence === 'YEAR') &&
+        transaction.installments.length > 0
+      ) {
         const currentInstallment = transaction.installments.find(
           (installment) =>
             new Date(installment.payDate).getMonth() + 1 === month &&
@@ -95,20 +102,53 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
         )
 
         if (currentInstallment) {
+          // Garantir que o status seja um valor literal válido
+          const installmentStatus: 'paid' | 'pending' =
+            currentInstallment.status
+
+          return {
+            ...transaction,
+            status: installmentStatus, // Agora o status é corretamente tipado
+          }
+        }
+      }
+
+      // Lógica para transações com recorrência 'VARIABLE' e parcelas
+      if (
+        transaction.recurrence === 'VARIABLE' &&
+        transaction.installments.length > 0
+      ) {
+        // Encontra a parcela atual com base no mês e ano
+        const currentInstallment = transaction.installments.find(
+          (installment) =>
+            new Date(installment.payDate).getMonth() + 1 === month &&
+            new Date(installment.payDate).getFullYear() === year,
+        )
+
+        // Se existir uma parcela, formate o título
+        if (currentInstallment) {
+          const installmentTitle = `${transaction.title} (${currentInstallment.installment}/${
+            transaction.installments.length
+          })`
+
+          // Divide o valor pela quantidade de parcelas
           const installmentAmount =
             transaction.amount / transaction.installments.length
 
           return {
             ...transaction,
-            title: `${transaction.title} ${currentInstallment.installment}/${transaction.installments.length}`, // Atualiza o título
-            amount: parseFloat(installmentAmount.toFixed(2)), // Ajusta o valor do amount
+            title: installmentTitle, // Atualiza o título com o número da parcela
+            amount: installmentAmount, // Atualiza o valor dividindo pelas parcelas
+            status: currentInstallment.status,
           }
         }
       }
+
+      // Se não for de recorrência 'VARIABLE' nem mensal/anual, retorna a transação original
       return transaction
     })
 
-    setTransactions(updatedTransactions)
+    setTransactions(updatedTransactions) // Atualiza o estado com as transações modificadas
   }, [data, month, year])
 
   useEffect(() => {
@@ -181,15 +221,15 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
     })
   }
 
-  type handleOnDeleteProps = {
+  type handleDeleteMenuContextProps = {
     walletId: string
     transactionId: string
   }
 
-  const handleOneDelete = ({
+  const handleDeleteMenuContext = ({
     walletId,
     transactionId,
-  }: handleOnDeleteProps) => {
+  }: handleDeleteMenuContextProps) => {
     deleteTransactionAction({
       walletId,
       transactions: [transactionId],
@@ -204,13 +244,73 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
       })
   }
 
-  const handleUpdateStatus = (id: string, newStatus: 'paid' | 'pending') => {
-    setTransactions(
-      transactions.map((t) => (t.id === id ? { ...t, status: newStatus } : t)),
-    )
-    toast('Status Atualizado', {
-      description: `Status foi atualizado para ${newStatus === 'paid' ? 'Pago' : 'Pendente'}.`,
+  type handleUpdateStatusProps = {
+    walletId: string
+    transactions: Array<{
+      id: string
+      recurrence: 'VARIABLE' | 'MONTH' | 'YEAR'
+      payDate: string
+      status?: 'paid' | 'pending'
+      paidAt?: string
+      installments: Array<{
+        id: string
+        installment: number
+        status: 'paid' | 'pending'
+        isRecurring: boolean
+        payDate: string
+        paidAt?: string
+      }>
+    }>
+  }
+
+  const handleUpdateStatus = ({
+    walletId,
+    transactions,
+  }: handleUpdateStatusProps) => {
+    const updatedTransactions = transactions.map((transaction) => {
+      if (
+        transaction.recurrence === 'MONTH' ||
+        transaction.recurrence === 'YEAR'
+      ) {
+        const currentPayDate = new Date(transaction.payDate)
+        currentPayDate.setMonth(month - 1)
+        currentPayDate.setFullYear(year)
+        transaction.payDate = currentPayDate.toISOString()
+
+        // Se houver parcelas, filtra as parcelas com o mês e ano desejados
+        if (transaction.installments && transaction.installments.length > 0) {
+          const filteredInstallments = transaction.installments.filter(
+            (installment) => {
+              const installmentDate = new Date(installment.payDate)
+              const installmentMonth = installmentDate.getMonth() + 1
+
+              return (
+                installmentMonth === month &&
+                installmentDate.getFullYear() === year
+              )
+            },
+          )
+          transaction.installments = filteredInstallments
+        }
+      }
+
+      return transaction
     })
+
+    updatePaymentTransactionsAction({
+      walletId,
+      transactions: updatedTransactions,
+    })
+      .then(() => {
+        toast.success('Transação Atualizada com sucesso!')
+      })
+      .catch((err: unknown) => {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Erro desconhecido'
+        toast.error(
+          `Erro ao atualizar o status das transações: ${errorMessage}`,
+        )
+      })
   }
 
   const totalDespesasPedent = transactions
@@ -473,7 +573,7 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
                 </ContextMenuItem>
                 <ContextMenuItem
                   onClick={() =>
-                    handleOneDelete({
+                    handleDeleteMenuContext({
                       transactionId: transaction.id,
                       walletId: transaction.wallet.id,
                     })
@@ -485,7 +585,20 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
                 <ContextMenuSeparator />
                 {transaction.status === 'pending' ? (
                   <ContextMenuItem
-                    onClick={() => handleUpdateStatus(transaction.id, 'paid')}
+                    onClick={() =>
+                      handleUpdateStatus({
+                        walletId: transaction.wallet.id,
+                        transactions: [
+                          {
+                            id: transaction.id,
+                            status: 'paid',
+                            payDate: transaction.payDate,
+                            recurrence: transaction.recurrence,
+                            installments: transaction.installments,
+                          },
+                        ],
+                      })
+                    }
                     className="flex gap-2"
                   >
                     <CircleCheck className="size-4 text-green-500" />
@@ -493,10 +606,21 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
                   </ContextMenuItem>
                 ) : (
                   <ContextMenuItem
-                    onClick={() =>
-                      handleUpdateStatus(transaction.id, 'pending')
-                    }
                     className="flex gap-2"
+                    onClick={() =>
+                      handleUpdateStatus({
+                        walletId: transaction.wallet.id,
+                        transactions: [
+                          {
+                            id: transaction.id,
+                            status: 'pending',
+                            payDate: transaction.payDate,
+                            recurrence: transaction.recurrence,
+                            installments: transaction.installments,
+                          },
+                        ],
+                      })
+                    }
                   >
                     <CircleDashed className={`size-4 text-yellow-500`} />
                     Pendente
