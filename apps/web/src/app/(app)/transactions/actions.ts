@@ -3,6 +3,7 @@ import { HTTPError } from 'ky'
 import { z } from 'zod'
 
 import { createTransaction } from '@/http/create-transaction'
+import { deleteTransaction } from '@/http/delete-transaction'
 import { queryClient } from '@/lib/react-query'
 
 const createTransactionActionSchema = z.object({
@@ -155,4 +156,22 @@ export async function createTransactionAction(data: FormData) {
       errors: null,
     }
   }
+}
+
+interface DeleteTransactionActionProps {
+  walletId: string
+  transactions: Array<string>
+}
+
+export async function deleteTransactionAction({
+  walletId,
+  transactions,
+}: DeleteTransactionActionProps) {
+  await deleteTransaction({
+    walletId,
+    transactions,
+  })
+  await queryClient.invalidateQueries({
+    queryKey: ['transactions', walletId],
+  })
 }

@@ -16,6 +16,7 @@ import { requestAuthCode } from './routes/auth/request-auth-code'
 import { createCard } from './routes/cards/create-card'
 import { getTransactionsCategorys } from './routes/categorys/get-transactions-categorys'
 import { createTransaction } from './routes/transactions/create-transaction'
+import { deleteTransaction } from './routes/transactions/delete-transaction'
 import { getTransactions } from './routes/transactions/get-transactions'
 import { createWallet } from './routes/wallets/create-wallet'
 import { getWallet } from './routes/wallets/get-wallet'
@@ -42,6 +43,7 @@ app.register(createCard)
 
 app.register(getTransactions)
 app.register(createTransaction)
+app.register(deleteTransaction)
 
 app.register(getTransactionsCategorys)
 

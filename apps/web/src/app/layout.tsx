@@ -26,7 +26,7 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning={true}>
       <body
         cz-shortcut-listen="true"
-        className={`overflow-hidden bg-background ${roboto.className}`}
+        className={`dark overflow-hidden bg-background ${roboto.className}`}
       >
         <Providers>
           <Header />

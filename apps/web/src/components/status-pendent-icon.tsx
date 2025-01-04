@@ -38,8 +38,6 @@ export default function StatusPendentIcon({ dueDate }: { dueDate: Date }) {
     color = 'yellow'
   }
 
-  console.log(daysToDue, dueDate, daysRemaining)
-
   return (
     <CircleDashed
       className={`size-4 ${color === 'red' ? 'text-red-500' : color === 'yellow' ? 'text-yellow-500' : 'text-blue-500'}`}

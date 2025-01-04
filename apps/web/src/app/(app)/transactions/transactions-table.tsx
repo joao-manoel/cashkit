@@ -64,12 +64,14 @@ import { useDate } from '@/context/date-context'
 import { translate } from '@/utils/translate'
 import { months } from '@/utils/utils'
 
+import { deleteTransactionAction } from './actions'
+
 interface TransactionTableProps {
   data: Transactions[]
 }
 
 export function TransactionsTable({ data }: TransactionTableProps) {
-  const { month } = useDate()
+  const { month, year } = useDate()
   const [transactions, setTransactions] = useState<Transactions[]>(data)
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState('')
@@ -81,8 +83,31 @@ export function TransactionsTable({ data }: TransactionTableProps) {
   >('ALL')
 
   useEffect(() => {
-    setTransactions(data)
-  }, [data])
+    const updatedTransactions = data.map((transaction) => {
+      if (transaction.installments.length > 0) {
+        // Filtra a parcela correspondente ao mês e ano
+        const currentInstallment = transaction.installments.find(
+          (installment) =>
+            new Date(installment.payDate).getMonth() + 1 === month &&
+            new Date(installment.payDate).getFullYear() === year,
+        )
+
+        if (currentInstallment) {
+          const installmentAmount =
+            transaction.amount / transaction.installments.length
+
+          return {
+            ...transaction,
+            title: `${transaction.title} ${currentInstallment.installment}/${transaction.installments.length}`, // Atualiza o título
+            amount: parseFloat(installmentAmount.toFixed(2)), // Ajusta o valor do amount
+          }
+        }
+      }
+      return transaction
+    })
+
+    setTransactions(updatedTransactions)
+  }, [data, month, year])
 
   useEffect(() => {
     const filtered = transactions
@@ -136,6 +161,9 @@ export function TransactionsTable({ data }: TransactionTableProps) {
       ),
     )
     setSelectedTransactions([])
+    toast('Status Atualizado', {
+      description: `Status foi atualizado para ${newStatus === 'paid' ? 'Pago' : 'Pendente'}.`,
+    })
   }
 
   const handleDelete = () => {
@@ -151,19 +179,35 @@ export function TransactionsTable({ data }: TransactionTableProps) {
     })
   }
 
-  const handleOneDelete = (id: string) => {
-    setTransactions(transactions.filter((t) => t.id !== id))
-    toast('Transação Deletada', {
-      description: `Transação do id ${id} foi deletada.`,
+  type handleOnDeleteProps = {
+    walletId: string
+    transactionId: string
+  }
+
+  const handleOneDelete = ({
+    walletId,
+    transactionId,
+  }: handleOnDeleteProps) => {
+    deleteTransactionAction({
+      walletId,
+      transactions: [transactionId],
     })
+      .then(() => {
+        toast.success('Transação deletada com sucesso!')
+      })
+      .catch((err: unknown) => {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Erro desconhecido'
+        toast.error(`Erro ao deletar transação: ${errorMessage}`)
+      })
   }
 
   const handleUpdateStatus = (id: string, newStatus: 'paid' | 'pending') => {
     setTransactions(
       transactions.map((t) => (t.id === id ? { ...t, status: newStatus } : t)),
     )
-    toast('Status updated', {
-      description: `Transaction status changed to ${newStatus}.`,
+    toast('Status Atualizado', {
+      description: `Status foi atualizado para ${newStatus === 'paid' ? 'Pago' : 'Pendente'}.`,
     })
   }
 
@@ -190,7 +234,7 @@ export function TransactionsTable({ data }: TransactionTableProps) {
         <InfoCard
           amount={total}
           title="Saldo"
-          icon={<Wallet className="h-4 w-4 text-white" />}
+          icon={<Wallet className="h-4 w-4 dark:text-white" />}
         />
         <InfoCard
           amount={totalReceitasPendent}
@@ -435,7 +479,12 @@ export function TransactionsTable({ data }: TransactionTableProps) {
                   Editar
                 </ContextMenuItem>
                 <ContextMenuItem
-                  onClick={() => handleOneDelete(transaction.id)}
+                  onClick={() =>
+                    handleOneDelete({
+                      transactionId: transaction.id,
+                      walletId: transaction.wallet.id,
+                    })
+                  }
                 >
                   <Trash2 className="mr-2 h-4 w-4" />
                   Deletar
@@ -443,7 +492,7 @@ export function TransactionsTable({ data }: TransactionTableProps) {
                 <ContextMenuSeparator />
                 {transaction.status === 'pending' ? (
                   <ContextMenuItem
-                    onClick={() => console.log(transaction.id, 'paid')}
+                    onClick={() => handleUpdateStatus(transaction.id, 'paid')}
                     className="flex gap-2"
                   >
                     <CircleCheck className="size-4 text-green-500" />
