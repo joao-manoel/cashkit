@@ -2,12 +2,13 @@
 
 import { useQuery } from '@tanstack/react-query'
 
+import { Wallet } from '@/@types/wallet-type'
 import { Breadcrumb } from '@/components/breadcrumbs'
 import { DateDropdown } from '@/components/date-dropdown'
 import TransactionSkeleton from '@/components/transaction-skeleton'
 import { useDate } from '@/context/date-context' // Importando o contexto
 import { getTransactions } from '@/http/get-transactions'
-import { getWallet, GetWalletResponse } from '@/http/get-wallet'
+import { getWallet } from '@/http/get-wallet'
 
 import { TransactionsTable } from './transactions-table'
 
@@ -19,7 +20,7 @@ export default function TransactionsPage() {
     data: wallet,
     isLoading: isWalletLoading,
     error: walletError,
-  } = useQuery<GetWalletResponse, Error>({
+  } = useQuery<Wallet, Error>({
     queryKey: ['wallet'],
     queryFn: getWallet,
   })
@@ -37,7 +38,7 @@ export default function TransactionsPage() {
         month: month.toString(),
         year: year.toString(),
       }),
-    enabled: !!wallet, // Apenas busca transações se a carteira estiver disponível
+    enabled: !!wallet,
   })
 
   if (walletError || transactionsError) return <p>Erro ao carregar dados.</p>
@@ -53,7 +54,7 @@ export default function TransactionsPage() {
         {isTransactionsLoading || isWalletLoading ? (
           <TransactionSkeleton />
         ) : (
-          <TransactionsTable data={transactions || []} />
+          <TransactionsTable data={transactions || []} wallet={wallet} />
         )}
       </div>
     </div>

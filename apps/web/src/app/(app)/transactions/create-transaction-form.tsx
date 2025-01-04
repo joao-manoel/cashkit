@@ -5,8 +5,10 @@ import { AlertTriangle, CalendarIcon, Loader2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
+import { Wallet } from '@/@types/wallet-type'
 import { createTransactionAction } from '@/app/(app)/transactions/actions'
 import { CardIcon } from '@/components/card-icons'
+import CategoryIcon from '@/components/icon-categorys'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -27,13 +29,10 @@ import {
 import { useFormState } from '@/hooks/use-form-state'
 import { CardType } from '@/http/get-profile'
 import { GetTransactionsCategorysResponse } from '@/http/get-transactions-categorys'
-import { GetWalletResponse } from '@/http/get-wallet'
 import { cn } from '@/lib/utils'
 
-import CategoryIcon from './icon-categorys'
-
 export interface CreateIncomeFormProps {
-  wallet: GetWalletResponse
+  wallet: Wallet
   categorys: GetTransactionsCategorysResponse[]
   cards: CardType[]
 }

@@ -130,6 +130,9 @@ export async function createTransactionAction(data: FormData) {
       await queryClient.invalidateQueries({
         queryKey: ['transactions', walletId],
       })
+      await queryClient.invalidateQueries({
+        queryKey: ['wallet'],
+      })
       return {
         success: true,
         message: `Receita ${title} criada com sucesso!`,
@@ -170,6 +173,9 @@ export async function deleteTransactionAction({
   await deleteTransaction({
     walletId,
     transactions,
+  })
+  await queryClient.invalidateQueries({
+    queryKey: ['wallet'],
   })
   await queryClient.invalidateQueries({
     queryKey: ['transactions', walletId],

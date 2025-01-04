@@ -45,11 +45,49 @@ export async function deleteTransaction(app: FastifyInstance) {
           throw new BadRequestError('Wallet not found.')
         }
 
-        await prisma.transaction.deleteMany({
+        // Buscar transações a serem deletadas
+        const transactionsToDelete = await prisma.transaction.findMany({
           where: {
             id: { in: transactions },
             walletId,
           },
+        })
+
+        if (transactionsToDelete.length === 0) {
+          throw new BadRequestError('No transactions found.')
+        }
+
+        // Calcular ajuste no saldo
+        let balanceAdjustment = 0
+        transactionsToDelete.forEach((transaction) => {
+          if (transaction.status === 'paid') {
+            if (transaction.type === 'INCOME') {
+              balanceAdjustment -= transaction.amount // Subtrair no caso de receita
+            } else if (transaction.type === 'EXPENSE') {
+              balanceAdjustment += transaction.amount // Somar no caso de despesa
+            }
+          }
+        })
+
+        // Usar uma transação do Prisma para garantir que ambos os passos sejam atômicos
+        await prisma.$transaction(async (tx) => {
+          // Atualizar o saldo da carteira
+          await tx.wallet.update({
+            where: { id: walletId },
+            data: {
+              balance: {
+                increment: balanceAdjustment, // Incrementar ou decrementar o saldo
+              },
+            },
+          })
+
+          // Excluir as transações
+          await tx.transaction.deleteMany({
+            where: {
+              id: { in: transactions },
+              walletId,
+            },
+          })
         })
 
         return reply.status(204).send()

@@ -1,6 +1,13 @@
 import { PlusCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
 import { CardType, getProfile } from '@/http/get-profile'
 import {
   getTransactionsCategorys,
@@ -8,15 +15,8 @@ import {
 } from '@/http/get-transactions-categorys'
 import { getWallet, GetWalletResponse } from '@/http/get-wallet'
 
+import { Button } from '../../../components/ui/button'
 import CreateIncomeForm from './create-transaction-form'
-import { Button } from './ui/button'
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-} from './ui/dialog'
 
 export default function CreateTransactionButton() {
   const [wallet, setWallet] = useState<GetWalletResponse | null>(null)

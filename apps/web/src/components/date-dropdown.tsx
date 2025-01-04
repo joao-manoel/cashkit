@@ -37,7 +37,7 @@ export function DateDropdown() {
       <DropdownMenuTrigger asChild>
         <Button
           variant="outline"
-          className="min-w-40 justify-between bg-gray-100 dark:bg-black/20 lg:min-w-52"
+          className="min-w-40 justify-between bg-gray-100 dark:bg-background lg:min-w-52"
         >
           <CalendarDays />
           <span className="flex flex-col text-sm font-medium lg:flex-row lg:gap-2">

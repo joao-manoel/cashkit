@@ -132,6 +132,20 @@ export async function createTransaction(app: FastifyInstance) {
             },
           })
 
+          if (status === 'paid') {
+            await prisma.wallet.update({
+              where: {
+                id: wallet.id,
+              },
+              data: {
+                balance:
+                  type === 'INCOME'
+                    ? wallet.balance + amount
+                    : wallet.balance - amount,
+              },
+            })
+          }
+
           reply.status(201).send({
             transactionId: transaction.id,
           })

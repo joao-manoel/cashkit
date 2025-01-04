@@ -1,9 +1,6 @@
-import { api } from './api-client'
+import { Wallet } from '@/@types/wallet-type'
 
-export interface GetWalletResponse {
-  id: string
-  name: string
-}
+import { api } from './api-client'
 
 export async function getWallet() {
   const result = await api
@@ -12,7 +9,7 @@ export async function getWallet() {
         tags: [`wallet`],
       },
     })
-    .json<GetWalletResponse>()
+    .json<Wallet>()
 
   return result
 }

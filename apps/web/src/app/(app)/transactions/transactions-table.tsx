@@ -20,8 +20,8 @@ import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Transactions } from '@/@types/transactions-types'
+import { Wallet as WalletType } from '@/@types/wallet-type'
 import { CardIcon } from '@/components/card-icons'
-import CreateTransactionButton from '@/components/create-transactions-button'
 import InfoCard from '@/components/info-card'
 import StatusPendentIcon from '@/components/status-pendent-icon'
 import {
@@ -65,12 +65,14 @@ import { translate } from '@/utils/translate'
 import { months } from '@/utils/utils'
 
 import { deleteTransactionAction } from './actions'
+import CreateTransactionButton from './create-transactions-button'
 
 interface TransactionTableProps {
   data: Transactions[]
+  wallet: WalletType | undefined
 }
 
-export function TransactionsTable({ data }: TransactionTableProps) {
+export function TransactionsTable({ data, wallet }: TransactionTableProps) {
   const { month, year } = useDate()
   const [transactions, setTransactions] = useState<Transactions[]>(data)
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([])
@@ -215,24 +217,15 @@ export function TransactionsTable({ data }: TransactionTableProps) {
     .filter((t) => t.type === 'EXPENSE' && t.status === 'pending')
     .reduce((sum, t) => sum + t.amount, 0)
 
-  const totalDespesasPaid = transactions
-    .filter((t) => t.type === 'EXPENSE' && t.status === 'paid')
-    .reduce((sum, t) => sum + t.amount, 0)
-
   const totalReceitasPendent = transactions
     .filter((t) => t.type === 'INCOME' && t.status === 'pending')
     .reduce((sum, t) => sum + t.amount, 0)
 
-  const total =
-    transactions
-      .filter((t) => t.type === 'INCOME' && t.status === 'paid')
-      .reduce((sum, t) => sum + t.amount, 0) - totalDespesasPaid
-
   return (
-    <div className="mt-4 space-y-4 pb-10">
+    <div className="mt-4 space-y-3 pb-10">
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <InfoCard
-          amount={total}
+          amount={wallet ? wallet.balance : 0}
           title="Saldo"
           icon={<Wallet className="h-4 w-4 dark:text-white" />}
         />
@@ -514,11 +507,17 @@ export function TransactionsTable({ data }: TransactionTableProps) {
           ))}
         </TableBody>
       </Table>
-      <div className="h-6">
-        <p className="text-xs text-gray-500">
-          Total de transações: {filteredTransactions.length}
-        </p>
-      </div>
+      {filteredTransactions.length <= 0 ? (
+        <span className="flex justify-center p-2 font-light text-zinc-300">
+          Não foi encontrada nenhuma transação
+        </span>
+      ) : (
+        <div className="h-6">
+          <p className="text-xs text-gray-500">
+            Total de transações: {filteredTransactions.length}
+          </p>
+        </div>
+      )}
     </div>
   )
 }
