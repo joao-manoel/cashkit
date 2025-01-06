@@ -4,7 +4,7 @@ import { z } from 'zod'
 
 import { createTransaction } from '@/http/create-transaction'
 import { deleteTransaction } from '@/http/delete-transaction'
-import { updatePaymentTransactions } from '@/http/update-payment-transactions'
+import { updateTransactionsStatus } from '@/http/update-transactions-status'
 import { queryClient } from '@/lib/react-query'
 
 const createTransactionActionSchema = z.object({
@@ -183,7 +183,7 @@ export async function deleteTransactionAction({
   })
 }
 
-interface UpdatePaymentTransactionsActionProps {
+interface UpdateTransactionsStatusActionProps {
   walletId: string
   transactions: Array<{
     id: string
@@ -197,11 +197,11 @@ interface UpdatePaymentTransactionsActionProps {
   }>
 }
 
-export async function updatePaymentTransactionsAction({
+export async function updateTransactionsStatusAction({
   walletId,
   transactions,
-}: UpdatePaymentTransactionsActionProps) {
-  updatePaymentTransactions({
+}: UpdateTransactionsStatusActionProps) {
+  updateTransactionsStatus({
     walletId,
     transactions,
   })

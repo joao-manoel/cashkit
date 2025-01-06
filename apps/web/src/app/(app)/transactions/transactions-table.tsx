@@ -66,7 +66,7 @@ import { months } from '@/utils/utils'
 
 import {
   deleteTransactionAction,
-  updatePaymentTransactionsAction,
+  updateTransactionsStatusAction,
 } from './actions'
 import CreateTransactionButton from './create-transactions-button'
 
@@ -277,7 +277,6 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
         currentPayDate.setFullYear(year)
         transaction.payDate = currentPayDate.toISOString()
 
-        // Se houver parcelas, filtra as parcelas com o mês e ano desejados
         if (transaction.installments && transaction.installments.length > 0) {
           const filteredInstallments = transaction.installments.filter(
             (installment) => {
@@ -292,12 +291,35 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
           )
           transaction.installments = filteredInstallments
         }
+      } else if (
+        transaction.recurrence === 'VARIABLE' &&
+        transaction.installments &&
+        transaction.installments.length > 0
+      ) {
+        // Filtra os installments que coincidem com o mês e ano de `transaction.payDate`
+        const variablePayDate = new Date(transaction.payDate)
+        const variableMonth = variablePayDate.getMonth() + 1
+        const variableYear = variablePayDate.getFullYear()
+
+        const filteredInstallments = transaction.installments.filter(
+          (installment) => {
+            const installmentDate = new Date(installment.payDate)
+            const installmentMonth = installmentDate.getMonth() + 1
+            const installmentYear = installmentDate.getFullYear()
+
+            return (
+              installmentMonth === variableMonth &&
+              installmentYear === variableYear
+            )
+          },
+        )
+        transaction.installments = filteredInstallments
       }
 
       return transaction
     })
 
-    updatePaymentTransactionsAction({
+    updateTransactionsStatusAction({
       walletId,
       transactions: updatedTransactions,
     })

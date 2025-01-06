@@ -1,6 +1,6 @@
 import { api } from './api-client'
 
-interface UpdatePaymentTransactionsRequest {
+interface UpdateTransactionsStatusRequest {
   walletId: string
   transactions: Array<{
     id: string
@@ -14,12 +14,12 @@ interface UpdatePaymentTransactionsRequest {
   }>
 }
 
-export async function updatePaymentTransactions({
+export async function updateTransactionsStatus({
   walletId,
   transactions,
-}: UpdatePaymentTransactionsRequest) {
+}: UpdateTransactionsStatusRequest) {
   await api
-    .put(`wallet/${walletId}/update-payment/transactions`, {
+    .put(`wallet/${walletId}/transactions/status`, {
       json: {
         transactions,
       },

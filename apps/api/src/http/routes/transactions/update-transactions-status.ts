@@ -7,12 +7,12 @@ import { BadRequestError } from '@/http/errors/bad-request-error'
 import { auth } from '@/http/middlewares/auth'
 import { prisma } from '@/lib/prisma'
 
-export async function updatePaymentTransactions(app: FastifyInstance) {
+export async function updateTransactionsStatus(app: FastifyInstance) {
   app
     .withTypeProvider<ZodTypeProvider>()
     .register(auth)
     .put(
-      '/wallet/:walletId/update-payment/transactions',
+      '/wallet/:walletId/transactions/status',
       {
         schema: {
           tags: ['Transactions'],
@@ -81,21 +81,38 @@ export async function updatePaymentTransactions(app: FastifyInstance) {
                 where: { transactionId: transaction.id },
               })
 
-              await prisma.installments.create({
-                data: {
-                  transactionId: transaction.id,
-                  installment: installmentCount + 1, // Increment based on existing installments
-                  status: transaction.status || TransactionStatusType.paid,
-                  payDate,
-                  paidAt,
-                  isRecurring: transaction.recurrence === RecurrenceType.MONTH,
-                },
-              })
+              if (
+                transaction.installments &&
+                transaction.installments.length > 0
+              ) {
+                for (const installment of transaction.installments) {
+                  await prisma.installments.update({
+                    where: {
+                      id: installment.id,
+                    },
+                    data: {
+                      status: transaction.status || TransactionStatusType.paid,
+                      paidAt,
+                    },
+                  })
+                }
+              } else {
+                await prisma.installments.create({
+                  data: {
+                    transactionId: transaction.id,
+                    installment: installmentCount + 1,
+                    status: transaction.status || TransactionStatusType.paid,
+                    payDate,
+                    paidAt,
+                    isRecurring:
+                      transaction.recurrence === RecurrenceType.MONTH,
+                  },
+                })
+              }
             } else if (
               transaction.recurrence === RecurrenceType.VARIABLE &&
               !transaction.installments
             ) {
-              // Update the transaction directly
               await prisma.transaction.update({
                 where: { id: transaction.id },
                 data: {
