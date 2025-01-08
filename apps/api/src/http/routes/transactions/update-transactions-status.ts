@@ -1,4 +1,8 @@
-import { RecurrenceType, TransactionStatusType } from '@prisma/client'
+import {
+  RecurrenceType,
+  TransactionStatusType,
+  TransactionType,
+} from '@prisma/client'
 import { FastifyInstance } from 'fastify'
 import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -25,6 +29,8 @@ export async function updateTransactionsStatus(app: FastifyInstance) {
             transactions: z.array(
               z.object({
                 id: z.string().uuid(),
+                type: z.nativeEnum(TransactionType),
+                amount: z.number(),
                 recurrence: z.nativeEnum(RecurrenceType),
                 payDate: z.string().optional(),
                 paidAt: z.string().optional(),
@@ -86,55 +92,147 @@ export async function updateTransactionsStatus(app: FastifyInstance) {
                 transaction.installments.length > 0
               ) {
                 for (const installment of transaction.installments) {
-                  await prisma.installments.update({
+                  await Promise.all([
+                    await prisma.installments.update({
+                      where: {
+                        id: installment.id,
+                      },
+                      data: {
+                        status:
+                          transaction.status || TransactionStatusType.paid,
+                        paidAt,
+                      },
+                    }),
+
+                    await prisma.wallet.update({
+                      where: {
+                        id: wallet.id,
+                      },
+                      data: {
+                        balance:
+                          transaction.type === TransactionType.EXPENSE &&
+                          transaction.status === TransactionStatusType.paid
+                            ? wallet.balance - transaction.amount
+                            : (transaction.type === TransactionType.EXPENSE &&
+                                  transaction.status ===
+                                    TransactionStatusType.pending) ||
+                                (transaction.type === TransactionType.INCOME &&
+                                  transaction.status ===
+                                    TransactionStatusType.paid)
+                              ? wallet.balance + transaction.amount
+                              : wallet.balance - transaction.amount,
+                      },
+                    }),
+                  ])
+                }
+              } else {
+                await Promise.all([
+                  await prisma.installments.create({
+                    data: {
+                      transactionId: transaction.id,
+                      installment: installmentCount + 1,
+                      status: transaction.status || TransactionStatusType.paid,
+                      payDate,
+                      paidAt,
+                      isRecurring:
+                        transaction.recurrence === RecurrenceType.MONTH,
+                    },
+                  }),
+                  await prisma.wallet.update({
                     where: {
+                      id: wallet.id,
+                    },
+                    data: {
+                      balance:
+                        transaction.type === TransactionType.EXPENSE &&
+                        transaction.status === TransactionStatusType.paid
+                          ? wallet.balance - transaction.amount
+                          : (transaction.type === TransactionType.EXPENSE &&
+                                transaction.status ===
+                                  TransactionStatusType.pending) ||
+                              (transaction.type === TransactionType.INCOME &&
+                                transaction.status ===
+                                  TransactionStatusType.paid)
+                            ? wallet.balance + transaction.amount
+                            : wallet.balance - transaction.amount,
+                    },
+                  }),
+                ])
+              }
+            } else if (
+              transaction.recurrence === RecurrenceType.VARIABLE &&
+              transaction.installments &&
+              transaction.installments.length <= 0
+            ) {
+              await Promise.all([
+                await prisma.transaction.update({
+                  where: { id: transaction.id },
+                  data: {
+                    status: transaction.status || TransactionStatusType.paid,
+                    payDate,
+                  },
+                }),
+                await prisma.wallet.update({
+                  where: {
+                    id: wallet.id,
+                  },
+                  data: {
+                    balance:
+                      transaction.type === TransactionType.EXPENSE &&
+                      transaction.status === TransactionStatusType.paid
+                        ? wallet.balance - transaction.amount
+                        : (transaction.type === TransactionType.EXPENSE &&
+                              transaction.status ===
+                                TransactionStatusType.pending) ||
+                            (transaction.type === TransactionType.INCOME &&
+                              transaction.status === TransactionStatusType.paid)
+                          ? wallet.balance + transaction.amount
+                          : wallet.balance - transaction.amount,
+                  },
+                }),
+              ])
+            } else if (
+              transaction.installments &&
+              transaction.installments.length > 0 &&
+              transaction.recurrence === RecurrenceType.VARIABLE
+            ) {
+              for (const installment of transaction.installments) {
+                await Promise.all([
+                  await prisma.installments.updateMany({
+                    where: {
+                      transactionId: transaction.id,
                       id: installment.id,
                     },
                     data: {
                       status: transaction.status || TransactionStatusType.paid,
                       paidAt,
                     },
-                  })
-                }
-              } else {
-                await prisma.installments.create({
-                  data: {
-                    transactionId: transaction.id,
-                    installment: installmentCount + 1,
-                    status: transaction.status || TransactionStatusType.paid,
-                    payDate,
-                    paidAt,
-                    isRecurring:
-                      transaction.recurrence === RecurrenceType.MONTH,
-                  },
-                })
-              }
-            } else if (
-              transaction.recurrence === RecurrenceType.VARIABLE &&
-              !transaction.installments
-            ) {
-              await prisma.transaction.update({
-                where: { id: transaction.id },
-                data: {
-                  status: transaction.status || TransactionStatusType.paid,
-                  payDate,
-                },
-              })
-            } else if (
-              transaction.installments &&
-              transaction.recurrence === RecurrenceType.VARIABLE
-            ) {
-              for (const installment of transaction.installments) {
-                await prisma.installments.updateMany({
-                  where: {
-                    transactionId: transaction.id,
-                    id: installment.id,
-                  },
-                  data: {
-                    status: transaction.status || TransactionStatusType.paid,
-                    paidAt,
-                  },
-                })
+                  }),
+                  await prisma.wallet.update({
+                    where: {
+                      id: wallet.id,
+                    },
+                    data: {
+                      balance:
+                        transaction.type === TransactionType.EXPENSE &&
+                        transaction.status === TransactionStatusType.paid
+                          ? wallet.balance -
+                            transaction.amount / transaction.installments.length
+                          : (transaction.type === TransactionType.EXPENSE &&
+                                transaction.status ===
+                                  TransactionStatusType.pending) ||
+                              (transaction.type === TransactionType.INCOME &&
+                                transaction.status ===
+                                  TransactionStatusType.paid)
+                            ? wallet.balance +
+                              transaction.amount /
+                                transaction.installments.length
+                            : wallet.balance -
+                              transaction.amount /
+                                transaction.installments.length,
+                    },
+                  }),
+                ])
 
                 const installmentData = await prisma.installments.findMany({
                   where: {

@@ -19,7 +19,7 @@ import {
 import React, { useEffect, useState } from 'react'
 import { toast } from 'sonner'
 
-import { Transactions } from '@/@types/transactions-types'
+import { Transactions, TransactionType } from '@/@types/transactions-types'
 import { Wallet as WalletType } from '@/@types/wallet-type'
 import { CardIcon } from '@/components/card-icons'
 import InfoCard from '@/components/info-card'
@@ -250,6 +250,8 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
       id: string
       recurrence: 'VARIABLE' | 'MONTH' | 'YEAR'
       payDate: string
+      amount: number
+      type: TransactionType
       status?: 'paid' | 'pending'
       paidAt?: string
       installments: Array<{
@@ -324,7 +326,7 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
       transactions: updatedTransactions,
     })
       .then(() => {
-        toast.success('Transação Atualizada com sucesso!')
+        toast.success('Status da transação atualizada com sucesso!')
       })
       .catch((err: unknown) => {
         const errorMessage =
@@ -614,6 +616,8 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
                           {
                             id: transaction.id,
                             status: 'paid',
+                            type: transaction.type,
+                            amount: transaction.amount,
                             payDate: transaction.payDate,
                             recurrence: transaction.recurrence,
                             installments: transaction.installments,
@@ -636,6 +640,8 @@ export function TransactionsTable({ data, wallet }: TransactionTableProps) {
                           {
                             id: transaction.id,
                             status: 'pending',
+                            type: transaction.type,
+                            amount: transaction.amount,
                             payDate: transaction.payDate,
                             recurrence: transaction.recurrence,
                             installments: transaction.installments,
