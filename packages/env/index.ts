@@ -1,5 +1,5 @@
-import { createEnv } from "@t3-oss/env-nextjs";
-import { z } from "zod";
+import { createEnv } from '@t3-oss/env-nextjs'
+import { z } from 'zod'
 
 export const env = createEnv({
   server: {
@@ -15,15 +15,12 @@ export const env = createEnv({
 
     NODEMAILER_USER: z.string(),
     NODEMAILER_PASSWORD: z.string(),
-    
   },
-  client: {
-    
-  },
+  client: {},
   shared: {
     NEXT_PUBLIC_API_URL: z.string(),
   },
-  runtimeEnv:{
+  runtimeEnv: {
     PORT: process.env.PORT,
     JWT_SECRET: process.env.JWT_SECRET,
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
@@ -34,5 +31,5 @@ export const env = createEnv({
     REDIS_PORT: process.env.REDIS_PORT,
     NODEMAILER_USER: process.env.NODEMAILER_USER,
     NODEMAILER_PASSWORD: process.env.NODEMAILER_PASSWORD,
-  }
+  },
 })
