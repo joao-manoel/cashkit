@@ -1,24 +1,34 @@
-# Dockerfile
+# Etapa 1: build
+FROM node:20 AS builder
 
-FROM node:20
-
-# Ativa o Corepack para instalar o pnpm
+# Habilita o corepack e instala o pnpm
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
-# Cria diretório de trabalho
+# Diretório de trabalho
 WORKDIR /app
 
-# Copia os arquivos da aplicação
+# Copia o monorepo inteiro
 COPY . .
 
-# Instala dependências
+# Instala dependências e builda tudo
 RUN pnpm install
+RUN pnpm turbo run build --filter=web...
 
-# Faz o build da aplicação
-RUN pnpm build
+# Etapa 2: container leve para produção
+FROM node:20-alpine AS runner
 
-# Expõe a porta
+WORKDIR /app
+
+# Habilita o pnpm só se precisar rodar comandos em runtime
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copia apenas os arquivos buildados
+COPY --from=builder /app/apps/web/.next .next
+COPY --from=builder /app/apps/web/public public
+COPY --from=builder /app/apps/web/package.json .
+COPY --from=builder /app/node_modules node_modules
+
 EXPOSE 3000
 
-# Comando de start (altere conforme seu framework)
+# Inicia a aplicação (Next.js)
 CMD ["pnpm", "start"]
