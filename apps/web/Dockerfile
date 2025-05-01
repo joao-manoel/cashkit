@@ -1,34 +1,40 @@
-# Etapa 1: build
+# Etapa 1: Builder
 FROM node:20 AS builder
 
-# Habilita o corepack e instala o pnpm
-RUN corepack enable && corepack prepare pnpm@latest --activate
+# Habilita o pnpm via corepack
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
-# Diretório de trabalho
+# Define diretório de trabalho
 WORKDIR /app
 
-# Copia o monorepo inteiro
+# Copia tudo (monorepo inteiro) para dentro do container
 COPY . .
 
-# Instala dependências e builda tudo
+# Instala dependências do monorepo
 RUN pnpm install
-RUN pnpm turbo run build --filter=web...
 
-# Etapa 2: container leve para produção
+# Builda apenas o app web com filtro Turbo
+RUN pnpm turbo run build --filter=@ck/web...
+
+# Etapa 2: Runner leve com Alpine
 FROM node:20-alpine AS runner
+
+# Habilita pnpm (caso precise no runtime)
+RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 WORKDIR /app
 
-# Habilita o pnpm só se precisar rodar comandos em runtime
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
-# Copia apenas os arquivos buildados
+# Copia os arquivos necessários da build
 COPY --from=builder /app/apps/web/.next .next
 COPY --from=builder /app/apps/web/public public
 COPY --from=builder /app/apps/web/package.json .
 COPY --from=builder /app/node_modules node_modules
 
+# Define variáveis de ambiente (exemplo)
+ENV NODE_ENV=production
+ENV PORT=3000
+
 EXPOSE 3000
 
-# Inicia a aplicação (Next.js)
+# Inicia o servidor Next.js
 CMD ["pnpm", "start"]
