@@ -6,7 +6,7 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 WORKDIR /app
 
-# Copia os arquivos do projeto
+# Copia os arquivos do projeto atualizado
 COPY . .
 
 # Define os argumentos de build que virão do Coolify
