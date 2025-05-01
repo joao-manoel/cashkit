@@ -28,6 +28,7 @@ COPY --from=builder /app/apps/web/package.json .
 COPY --from=builder /app/node_modules node_modules
 
 ENV NODE_ENV=production
+COPY .env.production .env
 ENV PORT=3000
 
 EXPOSE 3000
