@@ -13,7 +13,6 @@
     
     RUN pnpm install --frozen-lockfile
     
-    # Prisma generate
     WORKDIR /repo/apps/api
     RUN pnpm exec prisma generate --schema=prisma/schema.prisma
     
@@ -22,28 +21,26 @@
     WORKDIR /repo
     
     COPY --from=deps /repo ./
-    
     ENV NODE_ENV=production
     
-    # Build API
     RUN pnpm --filter @ck/api build
     
-    # Install production deps only for API
+    # Instala somente as deps da API (na própria pasta)
     WORKDIR /repo/apps/api
     RUN pnpm install --prod
     
-    # ---- Runtime ----
+    # ---- Runner ----
     FROM node:20-alpine AS runner
     
-    # API será o root da app final
+    # Copia a API como raiz da aplicação
     WORKDIR /app
-    
     ENV NODE_ENV=production
     ENV PORT=3333
     
-    # Copia apenas a API completa com deps, prisma e dist
+    # Copia tudo da API já construída
     COPY --from=builder /repo/apps/api ./
     
+    # Expõe a porta
     EXPOSE 3333
     
     CMD ["node", "dist/server.js"]
