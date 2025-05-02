@@ -2,45 +2,48 @@
     FROM node:20-alpine AS base
     RUN npm install -g pnpm
     
-    # ---- Dependencies ----
+    # ---- Dependências ----
     FROM base AS deps
-    WORKDIR /repo
+    WORKDIR /app
     
     COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
     COPY apps ./apps
     COPY packages ./packages
     COPY config ./config
     
+    ENV PNPM_NODE_LINKER=hoisted
     RUN pnpm install --frozen-lockfile
     
-    WORKDIR /repo/apps/api
-    RUN pnpm exec prisma generate --schema=prisma/schema.prisma
-    
-    # ---- Build ----
+    # ---- Builder ----
     FROM base AS builder
-    WORKDIR /repo
+    WORKDIR /app
     
-    COPY --from=deps /repo ./
+    COPY --from=deps /app ./
+    
     ENV NODE_ENV=production
     
+    # Build da API
     RUN pnpm --filter @ck/api build
     
-    # Instala somente as deps da API (na própria pasta)
-    WORKDIR /repo/apps/api
+    # Gera Prisma Client corretamente (caminho relativo à raiz da API)
+    WORKDIR /app/apps/api
+    RUN pnpm exec prisma generate --schema=prisma/schema.prisma
+    
+    # Instala dependências de produção da API (com arquivos físicos)
     RUN pnpm install --prod
     
     # ---- Runner ----
     FROM node:20-alpine AS runner
-    
-    # Copia a API como raiz da aplicação
     WORKDIR /app
+    
     ENV NODE_ENV=production
     ENV PORT=3333
     
-    # Copia tudo da API já construída
-    COPY --from=builder /repo/apps/api ./
+    COPY --from=builder /app/apps/api/dist ./dist
+    COPY --from=builder /app/apps/api/prisma ./prisma
+    COPY --from=builder /app/apps/api/package.json ./package.json
+    COPY --from=builder /app/apps/api/node_modules ./node_modules
     
-    # Expõe a porta
     EXPOSE 3333
     
     CMD ["node", "dist/server.js"]
