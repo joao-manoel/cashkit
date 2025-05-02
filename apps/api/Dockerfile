@@ -1,4 +1,4 @@
-# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v4 - Prisma generate path & ENV fix)
+# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v5 - Prod deps fix)
 
 # ---- Base ----
 # Use uma imagem base do Node.js. Ajuste a versão se necessário.
@@ -55,27 +55,28 @@ WORKDIR /app
 # Defina a variável de ambiente para produção
 ENV NODE_ENV=production
 # Defina a porta padrão (Coolify pode sobrescrever isso)
-# Verifique qual porta sua API Fastify escuta
 ENV PORT=3333
 
-# Adicione o diretório global de binários do Node ao PATH (para pnpm, se necessário)
-# Corrigido para usar o formato recomendado ENV key=value
+# Adicione o diretório global de binários do Node ao PATH (para pnpm)
 ENV PATH="/usr/local/lib/node_modules/.bin:${PATH}"
 
-# Copie apenas os artefatos de produção da etapa builder
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/dist ./dist 
-# Copiando o diretório prisma da API para a imagem final
-COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
-# Copie outros arquivos necessários em produção, se houver (ex: templates de email)
-# COPY --from=builder /app/apps/api/templates ./templates
-
-# Copie os arquivos de configuração do pnpm e package.json da API
-# Necessário se você precisar executar comandos pnpm no runner
+# Copie os arquivos de configuração do pnpm e package.json (root e API)
 COPY --from=builder /app/package.json ./package.json
 COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
 COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
+# Copie outros arquivos de configuração necessários se pnpm install --prod precisar deles
+# COPY --from=builder /app/tsconfig.base.json ./tsconfig.base.json # Exemplo
+
+# Instale APENAS as dependências de produção diretamente na imagem final
+# Isso evita problemas com symlinks copiados e garante que todos os módulos necessários estejam presentes
+RUN pnpm install --prod --frozen-lockfile
+
+# Copie os artefatos de build e prisma da etapa builder
+COPY --from=builder /app/apps/api/dist ./dist 
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+# Copie outros arquivos necessários em produção, se houver (ex: templates de email)
+# COPY --from=builder /app/apps/api/templates ./templates
 
 # Exponha a porta que a API escuta
 EXPOSE 3333
