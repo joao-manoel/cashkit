@@ -1,4 +1,4 @@
-# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v2 - Prisma path fix)
+# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v4 - Prisma generate path & ENV fix)
 
 # ---- Base ----
 # Use uma imagem base do Node.js. Ajuste a versão se necessário.
@@ -13,7 +13,8 @@ WORKDIR /app
 
 # Copie os arquivos de configuração do root, schema do Prisma (no caminho correto) e código fonte
 # Isso permite que o pnpm construa o grafo de dependências corretamente com todo o contexto
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./ 
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+# Copiando o diretório prisma da API
 COPY apps/api/prisma ./apps/api/prisma/
 # Descomente se você usa turbo.json
 # COPY turbo.json ./
@@ -27,8 +28,8 @@ RUN pnpm install --frozen-lockfile
 
 # Gere o cliente Prisma
 # Precisa ser executado após a instalação das dependências
-# O schema.prisma está agora em apps/api/prisma/schema.prisma
-RUN pnpm --filter @ck/api exec prisma generate --schema=./apps/api/prisma/schema.prisma
+# Usando caminho absoluto para garantir que o schema seja encontrado
+RUN pnpm --filter @ck/api exec prisma generate --schema=/app/apps/api/prisma/schema.prisma
 
 # ---- Builder ----
 FROM base AS builder
@@ -58,11 +59,13 @@ ENV NODE_ENV=production
 ENV PORT=3333
 
 # Adicione o diretório global de binários do Node ao PATH (para pnpm, se necessário)
-ENV PATH /usr/local/lib/node_modules/.bin:$PATH
+# Corrigido para usar o formato recomendado ENV key=value
+ENV PATH="/usr/local/lib/node_modules/.bin:${PATH}"
 
 # Copie apenas os artefatos de produção da etapa builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./dist 
+# Copiando o diretório prisma da API para a imagem final
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 # Copie outros arquivos necessários em produção, se houver (ex: templates de email)
 # COPY --from=builder /app/apps/api/templates ./templates
