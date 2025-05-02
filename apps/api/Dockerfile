@@ -1,4 +1,4 @@
-# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v5 - Prod deps fix)
+# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v6 - Prune fix)
 
 # ---- Base ----
 # Use uma imagem base do Node.js. Ajuste a versão se necessário.
@@ -43,10 +43,10 @@ ENV NODE_ENV=production
 
 # Construa a API específica
 # !!! IMPORTANTE: Certifique-se de que o script "build" existe no package.json de @ck/api !!!
-# Exemplo usando tsup (que está nas suas devDependencies):
-# "scripts": { ... "build": "tsup src/http/server.ts --out-dir dist --format cjs --clean" }
-# Ajuste o comando tsup conforme sua estrutura (entry point, output dir, etc.)
 RUN pnpm --filter @ck/api build
+
+# Remova as dependências de desenvolvimento para reduzir o tamanho da imagem final
+RUN pnpm prune --prod
 
 # ---- Runner ----
 FROM node:20-alpine AS runner
@@ -57,26 +57,20 @@ ENV NODE_ENV=production
 # Defina a porta padrão (Coolify pode sobrescrever isso)
 ENV PORT=3333
 
-# Adicione o diretório global de binários do Node ao PATH (para pnpm)
+# Adicione o diretório global de binários do Node ao PATH (para pnpm, se necessário)
 ENV PATH="/usr/local/lib/node_modules/.bin:${PATH}"
 
-# Copie os arquivos de configuração do pnpm e package.json (root e API)
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
-# Copie outros arquivos de configuração necessários se pnpm install --prod precisar deles
-# COPY --from=builder /app/tsconfig.base.json ./tsconfig.base.json # Exemplo
-
-# Instale APENAS as dependências de produção diretamente na imagem final
-# Isso evita problemas com symlinks copiados e garante que todos os módulos necessários estejam presentes
-RUN pnpm install --prod --frozen-lockfile
-
-# Copie os artefatos de build e prisma da etapa builder
+# Copie apenas os artefatos de produção da etapa builder
+# Copia node_modules já sem as devDependencies
+COPY --from=builder /app/node_modules ./node_modules 
 COPY --from=builder /app/apps/api/dist ./dist 
+# Copiando o diretório prisma da API para a imagem final
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 # Copie outros arquivos necessários em produção, se houver (ex: templates de email)
 # COPY --from=builder /app/apps/api/templates ./templates
+
+# Copie o package.json da API (pode ser útil para identificar a versão em runtime)
+COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 
 # Exponha a porta que a API escuta
 EXPOSE 3333
