@@ -1,4 +1,4 @@
-# Dockerfile para aplicação Next.js (@ck/web) em um Turborepo com pnpm (v2)
+# Dockerfile para aplicação Next.js (@ck/web) em um Turborepo com pnpm (v3 - sem standalone)
 
 # ---- Base ----
 # Use uma imagem base do Node.js. Ajuste a versão se necessário.
@@ -22,7 +22,6 @@ COPY config ./config
 
 # Instale todas as dependências do monorepo
 # O pnpm irá baixar apenas as dependências necessárias para o build posteriormente
-# Usar --prod aqui pode quebrar o build se ele precisar de devDependencies
 RUN pnpm install --frozen-lockfile
 
 # ---- Builder ----
@@ -37,7 +36,6 @@ ENV NODE_ENV=production
 
 # Construa a aplicação web específica
 # Use o nome do pacote definido no package.json da aplicação web (@ck/web)
-# O comando 'next' deve estar acessível agora pois as dependências foram instaladas com o contexto completo
 RUN pnpm --filter @ck/web build
 
 # ---- Runner ----
@@ -46,31 +44,23 @@ WORKDIR /app
 
 # Defina a variável de ambiente para produção
 ENV NODE_ENV=production
-# Defina a porta padrão do Next.js
+# Defina a porta padrão do Next.js (Coolify pode sobrescrever isso)
 ENV PORT=3000
 
-# Copie os artefatos da build da etapa builder
-# Next.js com output 'standalone' (recomendado) cria uma pasta standalone
-# Verifique se 'output: "standalone"' está configurado em apps/web/next.config.js
-COPY --from=builder /app/apps/web/.next/standalone ./ 
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
+# Copie os artefatos necessários da etapa builder para a execução sem standalone
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/web ./apps/web
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/config ./config
+COPY --from=builder /app/package.json ./package.json
+COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
+COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+# Descomente se você usa turbo.json
+# COPY --from=builder /app/turbo.json ./
 
 # Exponha a porta
 EXPOSE 3000
 
-# Comando para iniciar a aplicação
-# O server.js é parte do output standalone
-CMD ["node", "apps/web/server.js"]
-
-# --- Alternativa sem standalone (menos otimizado) ---
-# Se você não estiver usando 'output: "standalone"', comente as linhas COPY e CMD acima e descomente as abaixo:
-# COPY --from=builder /app/node_modules ./node_modules
-# COPY --from=builder /app/apps/web ./apps/web
-# COPY --from=builder /app/packages ./packages
-# COPY --from=builder /app/config ./config
-# COPY --from=builder /app/package.json ./package.json
-# COPY --from=builder /app/pnpm-lock.yaml ./pnpm-lock.yaml
-# COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
-# CMD ["pnpm", "--filter", "@ck/web", "start"]
+# Comando para iniciar a aplicação usando pnpm
+CMD ["pnpm", "--filter", "@ck/web", "start"]
 
