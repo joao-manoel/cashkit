@@ -14,7 +14,7 @@ WORKDIR /app
 # Copie os arquivos de configuração do root, schema do Prisma (no caminho correto) e código fonte
 # Isso permite que o pnpm construa o grafo de dependências corretamente com todo o contexto
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./ 
-COPY apps/api/prisma ./apps/api/prisma/ # Caminho corrigido
+COPY apps/api/prisma ./apps/api/prisma/
 # Descomente se você usa turbo.json
 # COPY turbo.json ./
 COPY apps ./apps
