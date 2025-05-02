@@ -1,44 +1,73 @@
-# Etapa 1: build do monorepo
-FROM node:20 AS builder
+# Dockerfile para aplicação Next.js (@ck/web) em um Turborepo com pnpm
 
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
+# ---- Base ----
+# Use uma imagem base do Node.js. Ajuste a versão se necessário.
+FROM node:20-alpine AS base
 
-WORKDIR /app
-COPY . .
+# Instale pnpm globalmente
+RUN npm install -g pnpm
 
-# Variáveis de ambiente opcionais
-ARG NEXT_PUBLIC_API_URL
-ARG JWT_SECRET
-ARG GOOGLE_OAUTH_CLIENT_SECRET
-ARG GOOGLE_OAUTH_CLIENT_ID
-ARG GOOGLE_OAUTH_REDIRECT_URI
-ARG NODEMAILER_USER
-ARG NODEMAILER_PASSWORD
-ARG REDIS_HOST
-ARG REDIS_PORT
-ARG PORT
-
-RUN pnpm install
-RUN pnpm turbo run build --filter=@ck/web...
-
-# Etapa 2: imagem enxuta de produção
-FROM node:20-alpine AS runner
-
-RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
-
+# ---- Dependências ----
+FROM base AS deps
 WORKDIR /app
 
-# Copia arquivos necessários
-COPY --from=builder /app/apps/web ./
-COPY --from=builder /app/apps/web/.next ./.next
-COPY --from=builder /app/apps/web/public ./public
-COPY --from=builder /app/apps/web/package.json ./package.json
+# Copie os arquivos de configuração do root
+# Inclua turbo.json se você o utiliza
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./ 
+# COPY turbo.json ./
 
-# Copia node_modules da raiz (onde o next está de fato)
-COPY --from=builder /app/apps/web/node_modules ./node_modules
+# Instale todas as dependências do monorepo
+# Isso é necessário para que o pnpm possa construir o grafo de dependências corretamente
+# O pnpm irá baixar apenas as dependências necessárias para o build posteriormente
+RUN pnpm install --frozen-lockfile
 
+# ---- Builder ----
+FROM base AS builder
+WORKDIR /app
+
+# Copie as dependências instaladas da etapa anterior
+COPY --from=deps /app/node_modules ./node_modules
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./ 
+# COPY turbo.json ./
+
+# Copie o código fonte das aplicações e pacotes
+# Copie a aplicação 'web' e quaisquer pacotes dos quais ela dependa
+COPY apps/web ./apps/web
+COPY packages ./packages
+COPY config ./config
+
+# Defina a variável de ambiente para produção
 ENV NODE_ENV=production
+
+# Construa a aplicação web específica
+# Use o nome do pacote definido no package.json da aplicação web (@ck/web)
+RUN pnpm --filter @ck/web build
+
+# ---- Runner ----
+FROM node:20-alpine AS runner
+WORKDIR /app
+
+# Defina a variável de ambiente para produção
+ENV NODE_ENV=production
+# Defina a porta padrão do Next.js
 ENV PORT=3000
 
+# Copie os artefatos da build da etapa builder
+# Next.js com output 'standalone' (recomendado) cria uma pasta standalone
+# Verifique se 'output: "standalone"' está configurado em apps/web/next.config.js
+COPY --from=builder /app/apps/web/.next/standalone ./ 
+COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder /app/apps/web/public ./apps/web/public
+
+# Exponha a porta
 EXPOSE 3000
-CMD ["pnpm", "start"]
+
+# Comando para iniciar a aplicação
+CMD ["node", "apps/web/server.js"]
+
+# --- Alternativa sem standalone (menos otimizado) ---
+# Se você não estiver usando 'output: "standalone"', comente as linhas COPY acima e descomente as abaixo:
+# COPY --from=builder /app/node_modules ./node_modules
+# COPY --from=builder /app/apps/web ./apps/web
+# COPY --from=builder /app/package.json ./
+# CMD ["pnpm", "--filter", "@ck/web", "start"]
