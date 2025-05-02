@@ -1,4 +1,4 @@
-# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v6 - Prune fix)
+# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v7 - Full node_modules copy)
 
 # ---- Base ----
 # Use uma imagem base do Node.js. Ajuste a versão se necessário.
@@ -35,7 +35,7 @@ RUN pnpm --filter @ck/api exec prisma generate --schema=/app/apps/api/prisma/sch
 FROM base AS builder
 WORKDIR /app
 
-# Copie tudo da etapa de dependências (incluindo node_modules, código fonte e cliente Prisma gerado)
+# Copie tudo da etapa de dependências (incluindo node_modules completo, código fonte e cliente Prisma gerado)
 COPY --from=deps /app ./ 
 
 # Defina a variável de ambiente para produção
@@ -45,8 +45,7 @@ ENV NODE_ENV=production
 # !!! IMPORTANTE: Certifique-se de que o script "build" existe no package.json de @ck/api !!!
 RUN pnpm --filter @ck/api build
 
-# Remova as dependências de desenvolvimento para reduzir o tamanho da imagem final
-RUN pnpm prune --prod
+# NÃO usamos mais pnpm prune aqui. Copiaremos o node_modules completo.
 
 # ---- Runner ----
 FROM node:20-alpine AS runner
@@ -60,8 +59,8 @@ ENV PORT=3333
 # Adicione o diretório global de binários do Node ao PATH (para pnpm, se necessário)
 ENV PATH="/usr/local/lib/node_modules/.bin:${PATH}"
 
-# Copie apenas os artefatos de produção da etapa builder
-# Copia node_modules já sem as devDependencies
+# Copie os artefatos de produção da etapa builder
+# Copia o node_modules COMPLETO da etapa builder para garantir que todos os links simbólicos funcionem
 COPY --from=builder /app/node_modules ./node_modules 
 COPY --from=builder /app/apps/api/dist ./dist 
 # Copiando o diretório prisma da API para a imagem final
@@ -77,11 +76,5 @@ EXPOSE 3333
 
 # Comando para iniciar a API
 # Ajuste o caminho para o entrypoint compilado (ex: dist/server.js)
-# Nota: Prisma migrations (pnpm exec prisma migrate deploy) devem ser executadas
-#       como um passo separado no seu processo de deploy ANTES de iniciar a aplicação.
-#       Coolify pode ter uma opção para "Comando de Migração".
-# Nota 2: Este CMD inicia apenas o servidor HTTP. A fila (src/queue/queue.ts)
-#         precisaria de um Dockerfile/serviço separado ou ser gerenciada por um
-#         process manager como PM2 dentro deste container.
 CMD ["node", "dist/server.js"]
 
