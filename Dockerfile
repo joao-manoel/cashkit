@@ -40,4 +40,4 @@ ENV PORT=3000
 EXPOSE 3000
 
 # Usa npx pois o "next" está nos node_modules locais
-CMD ["node", "node_modules/next/dist/bin/next", "start"]
+CMD ["npx", "next", "start"]
