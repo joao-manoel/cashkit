@@ -1,4 +1,4 @@
-# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v1)
+# Dockerfile para API Node.js/Fastify (@ck/api) em um Turborepo com pnpm (v2 - Prisma path fix)
 
 # ---- Base ----
 # Use uma imagem base do Node.js. Ajuste a versão se necessário.
@@ -11,10 +11,10 @@ RUN npm install -g pnpm
 FROM base AS deps
 WORKDIR /app
 
-# Copie os arquivos de configuração do root, schema do Prisma e código fonte
+# Copie os arquivos de configuração do root, schema do Prisma (no caminho correto) e código fonte
 # Isso permite que o pnpm construa o grafo de dependências corretamente com todo o contexto
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./ 
-COPY prisma ./prisma/
+COPY apps/api/prisma ./apps/api/prisma/ # Caminho corrigido
 # Descomente se você usa turbo.json
 # COPY turbo.json ./
 COPY apps ./apps
@@ -27,7 +27,8 @@ RUN pnpm install --frozen-lockfile
 
 # Gere o cliente Prisma
 # Precisa ser executado após a instalação das dependências
-RUN pnpm --filter @ck/api exec prisma generate
+# O schema.prisma está agora em apps/api/prisma/schema.prisma
+RUN pnpm --filter @ck/api exec prisma generate --schema=./apps/api/prisma/schema.prisma
 
 # ---- Builder ----
 FROM base AS builder
@@ -40,7 +41,7 @@ COPY --from=deps /app ./
 ENV NODE_ENV=production
 
 # Construa a API específica
-# !!! IMPORTANTE: Você precisa definir um script "build" no package.json de @ck/api !!!
+# !!! IMPORTANTE: Certifique-se de que o script "build" existe no package.json de @ck/api !!!
 # Exemplo usando tsup (que está nas suas devDependencies):
 # "scripts": { ... "build": "tsup src/http/server.ts --out-dir dist --format cjs --clean" }
 # Ajuste o comando tsup conforme sua estrutura (entry point, output dir, etc.)
@@ -62,7 +63,7 @@ ENV PATH /usr/local/lib/node_modules/.bin:$PATH
 # Copie apenas os artefatos de produção da etapa builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./dist 
-COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma # Caminho corrigido
 # Copie outros arquivos necessários em produção, se houver (ex: templates de email)
 # COPY --from=builder /app/apps/api/templates ./templates
 
@@ -77,7 +78,7 @@ COPY --from=builder /app/apps/api/package.json ./apps/api/package.json
 EXPOSE 3333
 
 # Comando para iniciar a API
-# Ajuste o caminho para o entrypoint compilado (ex: dist/http/server.js)
+# Ajuste o caminho para o entrypoint compilado (ex: dist/server.js)
 # Nota: Prisma migrations (pnpm exec prisma migrate deploy) devem ser executadas
 #       como um passo separado no seu processo de deploy ANTES de iniciar a aplicação.
 #       Coolify pode ter uma opção para "Comando de Migração".
