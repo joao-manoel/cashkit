@@ -1,4 +1,4 @@
-# Dockerfile para aplicação Next.js (@ck/web) em um Turborepo com pnpm (v4 - CMD fix)
+# Dockerfile para aplicação Next.js (@ck/web) em um Turborepo com pnpm (v5 - npx fix)
 
 # ---- Base ----
 # Use uma imagem base do Node.js. Ajuste a versão se necessário.
@@ -61,6 +61,6 @@ COPY --from=builder /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
 # Exponha a porta
 EXPOSE 3000
 
-# Comando para iniciar a aplicação usando pnpm (forma shell)
-# Isso evita o erro "Cannot find module '/app/pnpm'"
-CMD pnpm --filter @ck/web start
+# Comando para iniciar a aplicação usando npx pnpm (forma shell)
+# npx deve conseguir localizar o pnpm instalado globalmente ou localmente
+CMD npx pnpm --filter @ck/web start
