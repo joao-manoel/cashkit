@@ -1,57 +1,50 @@
 # ---- Base ----
     FROM node:20-alpine AS base
-
-    # Instala pnpm globalmente
     RUN npm install -g pnpm
     
-    # ---- Dependências ----
+    # ---- Dependencies ----
     FROM base AS deps
-    WORKDIR /app
+    WORKDIR /repo
     
-    # Copia arquivos do monorepo
     COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
     COPY apps ./apps
     COPY packages ./packages
     COPY config ./config
     
-    # Instala todas as dependências
     RUN pnpm install --frozen-lockfile
     
-    # Gera o cliente Prisma da API
-    WORKDIR /app/apps/api
+    # Prisma generate
+    WORKDIR /repo/apps/api
     RUN pnpm exec prisma generate --schema=prisma/schema.prisma
     
-    # ---- Builder ----
+    # ---- Build ----
     FROM base AS builder
-    WORKDIR /app
+    WORKDIR /repo
     
-    # Copia tudo da etapa anterior
-    COPY --from=deps /app ./
+    COPY --from=deps /repo ./
     
-    # Define ambiente de produção
     ENV NODE_ENV=production
     
-    # Compila a API
+    # Build API
     RUN pnpm --filter @ck/api build
     
-    # Instala só as dependências de produção da API
-    WORKDIR /app/apps/api
+    # Install production deps only for API
+    WORKDIR /repo/apps/api
     RUN pnpm install --prod
     
-    # ---- Runner ----
+    # ---- Runtime ----
     FROM node:20-alpine AS runner
+    
+    # API será o root da app final
     WORKDIR /app
     
     ENV NODE_ENV=production
     ENV PORT=3333
-    ENV PATH="/usr/local/lib/node_modules/.bin:${PATH}"
     
-    # Copia a API inteira (com dist, node_modules, prisma e package.json)
-    COPY --from=builder /app/apps/api ./ 
+    # Copia apenas a API completa com deps, prisma e dist
+    COPY --from=builder /repo/apps/api ./
     
-    # Expõe a porta padrão da API
     EXPOSE 3333
     
-    # Inicia o servidor
     CMD ["node", "dist/server.js"]
     
