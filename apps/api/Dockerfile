@@ -63,7 +63,7 @@ ENV PATH /usr/local/lib/node_modules/.bin:$PATH
 # Copie apenas os artefatos de produção da etapa builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/dist ./dist 
-COPY --from=builder /app/apps/api/prisma ./apps/api/prisma # Caminho corrigido
+COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 # Copie outros arquivos necessários em produção, se houver (ex: templates de email)
 # COPY --from=builder /app/apps/api/templates ./templates
 
