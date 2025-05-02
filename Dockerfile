@@ -35,7 +35,7 @@ COPY --from=builder /app/apps/web/public ./public
 COPY --from=builder /app/apps/web/package.json ./package.json
 
 # Copia node_modules da raiz (onde o next está de fato)
-COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/web/node_modules ./node_modules
 
 ENV NODE_ENV=production
 ENV PORT=3000
