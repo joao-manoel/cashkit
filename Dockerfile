@@ -22,11 +22,16 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 
 WORKDIR /app
 
-# Copia apenas o necessário para rodar o app web
-COPY --from=builder /app/apps/web ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/web/node_modules ./node_modules
-COPY --from=builder /app/apps/web/package.json ./
+# Copia o build e arquivos públicos
+COPY --from=builder /app/apps/web/.next .next
+COPY --from=builder /app/apps/web/public public
+COPY --from=builder /app/apps/web/package.json package.json
+COPY --from=builder /app/apps/web/node_modules node_modules
+
+# Se o next não estiver em apps/web/node_modules, adicione também:
+COPY --from=builder /app/node_modules node_modules
+
+# Configuração de ambiente
 COPY .env.production .env
 
 ENV NODE_ENV=production
