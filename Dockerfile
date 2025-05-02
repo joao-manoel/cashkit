@@ -8,7 +8,7 @@ RUN corepack enable && corepack prepare pnpm@9.0.0 --activate
 WORKDIR /app
 
 # Copia os arquivos necessários para instalação das dependências
-COPY .gitignore .npmrc pnpm-workspace.yaml turbo.json ./
+COPY .gitignore pnpm-workspace.yaml turbo.json ./
 COPY package.json pnpm-lock.yaml ./
 COPY apps/web/package.json apps/web/
 COPY packages ./packages
