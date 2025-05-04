@@ -24,7 +24,7 @@
     "fastify-type-provider-zod": "^4.0.2",
     "handlebars": "^4.7.8",
     "nodemailer": "^6.9.16",
-    "tsup": "^8.3.5",
+    "tsup": "^8.4.0",
     "zod": "^3.23.8"
   },
   "devDependencies": {
