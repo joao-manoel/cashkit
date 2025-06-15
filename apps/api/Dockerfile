@@ -18,7 +18,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm --filter ./apps/api prisma generate
 
 # Compila com tsc
-RUN pnpm --filter ./apps/api build
+RUN pnpm --filter @ck/api... build
 
 # Copia entrypoint que roda migrate e start
 COPY apps/api/entrypoint.sh ./entrypoint.sh
