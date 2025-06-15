@@ -10,15 +10,15 @@ export const env = createEnv({
     GOOGLE_OAUTH_CLIENT_ID: z.string(),
     GOOGLE_OAUTH_REDIRECT_URI: z.string(),
 
-    REDIS_HOST: z.string(),
-    REDIS_PORT: z.coerce.number(),
+    REDIS_HOST: z.string().default('redis'),
+    REDIS_PORT: z.coerce.number().default(6379),
 
     NODEMAILER_USER: z.string(),
     NODEMAILER_PASSWORD: z.string(),
   },
   client: {},
   shared: {
-    NEXT_PUBLIC_API_URL: z.string().default('http://localhost:3333'),
+    NEXT_PUBLIC_API_URL: z.string(),
   },
   runtimeEnv: {
     PORT: process.env.PORT,
