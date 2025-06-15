@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { isAuthenticated } from '@/auth/auth'
 
 export const metadata: Metadata = {
-  title: 'CashKit',
+  title: 'MeuBolso',
 }
 
 export default async function AuthLayout({

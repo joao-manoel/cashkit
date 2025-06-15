@@ -14,7 +14,7 @@ const roboto = Roboto({
 })
 
 export const metadata: Metadata = {
-  title: 'CashKit',
+  title: 'MeuBolso',
 }
 
 export default function RootLayout({

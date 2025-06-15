@@ -14,7 +14,7 @@ export default async function Header() {
       <div className="flex items-center gap-4">
         <CollapseMenuButton />
         <Link href="/" className="flex items-center gap-2">
-          <Image src={LogoIcon} className="size-6 dark:invert" alt="cashkit" />
+          <Image src={LogoIcon} className="size-6 dark:invert" alt="meubolso" />
           <span className="text-lg font-medium">
             Meu<span className="font-bold text-blue-600">Bolso</span>
           </span>
