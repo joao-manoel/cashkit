@@ -1,30 +1,28 @@
 FROM node:20-alpine
 
+# Define diretório de trabalho
 WORKDIR /app
 
-# Instala ferramentas globais
-RUN npm install -g pnpm tsx typescript
+# Instala dependências globais
+RUN npm install -g pnpm typescript tsx tsc-alias
 
-# Copia tudo do monorepo
+# Copia o monorepo inteiro
 COPY . .
 
-# Garante que o Prisma schema está presente no local correto
-# Certifique-se que apps/api/prisma/schema.prisma existe no host
-
-# Instala dependências do monorepo
+# Instala dependências
 RUN pnpm install --frozen-lockfile
 
-# Gera Prisma Client usando o schema no caminho correto
+# Garante que o Prisma schema esteja visível
 WORKDIR /app/apps/api
 RUN pnpm prisma generate
 
-# Volta para root do projeto para buildar com o filtro
-WORKDIR /app
-RUN pnpm --filter @ck/api build
+# Compila e ajusta os paths dos aliases
+RUN pnpm build
 
-# Dá permissão ao entrypoint
-RUN chmod +x ./apps/api/entrypoint.sh
+# Dá permissão ao script de entrada
+RUN chmod +x ./entrypoint.sh
 
+# Porta exposta
 EXPOSE 9090
 
-CMD ["./apps/api/entrypoint.sh"]
+CMD ["./entrypoint.sh"]

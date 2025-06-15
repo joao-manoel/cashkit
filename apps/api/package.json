@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && tsc-alias",
     "dev": "start pnpm dev:queue & pnpm env:load tsx watch src/http/server.ts",
     "dev:queue": "pnpm env:load tsx watch src/queue/queue.ts",
     "env:load": "dotenv -e ../../.env --",
@@ -36,6 +36,7 @@
     "@types/nodemailer": "^6.4.17",
     "eslint": "8",
     "prisma": "^6.1.0",
+    "tsc-alias": "^1.8.16",
     "tsx": "^4.19.2",
     "typescript": "^5"
   },
