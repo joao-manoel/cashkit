@@ -1,5 +1,5 @@
 'use client'
-import { ArrowRightLeft, HomeIcon } from 'lucide-react'
+import { HomeIcon } from 'lucide-react'
 import Link from 'next/link'
 
 import { useMenu } from '@/context/menu-context'

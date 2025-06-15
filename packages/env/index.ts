@@ -16,7 +16,7 @@ export const env = createEnv({
       ),
     GOOGLE_OAUTH_REDIRECT_URI: z
       .string()
-      .default('http://localhost:3000/api/auth/callback'),
+      .default('https://meubolso.site/api/auth/callback'),
 
     REDIS_HOST: z.string().default('redis'),
     REDIS_PORT: z.coerce.number().default(6379),

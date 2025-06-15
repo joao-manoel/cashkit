@@ -58,7 +58,7 @@ export default function CreateIncomeForm({
   const [installments, setInstallments] = useState<number>(1)
 
   const FilterCategory = categorys.filter(
-    (category) => category.transactionType === typeTransaction
+    (category) => category.transactionType === typeTransaction,
   )
 
   const installmentOptions = useMemo(
@@ -67,7 +67,7 @@ export default function CreateIncomeForm({
         value: (i + 1).toString(),
         label: (i + 1).toString(),
       })),
-    []
+    [],
   )
 
   const formatCurrency = (input: string) => {
@@ -81,7 +81,7 @@ export default function CreateIncomeForm({
 
   const calculateInstallmentAmount = () => {
     const numericValue = parseFloat(
-      amount.replace(/[^\d,]/g, '').replace(',', '.')
+      amount.replace(/[^\d,]/g, '').replace(',', '.'),
     )
     if (isNaN(numericValue) || installments === 0) return 'R$ 0,00'
     const installmentValue = numericValue / installments
@@ -117,7 +117,7 @@ export default function CreateIncomeForm({
       setEntryType('variable')
       setRecurrenceType('MONTH')
       setInstallments(1)
-    }
+    },
   )
 
   const handleEntryType = (entryType: EntryType) => {
@@ -297,7 +297,7 @@ export default function CreateIncomeForm({
                   variant={'outline'}
                   className={cn(
                     'w-full justify-start text-left font-normal dark:bg-background',
-                    !date && 'text-muted-foreground'
+                    !date && 'text-muted-foreground',
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />

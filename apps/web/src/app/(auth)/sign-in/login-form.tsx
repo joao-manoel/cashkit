@@ -12,7 +12,7 @@ import { requestAuthCodeAction, signInWithGoogleAction } from '../action'
 export default function LoginForm() {
   const router = useRouter()
   const [{ success, message }, handleSubmit, isPending] = useFormState(
-    requestAuthCodeAction
+    requestAuthCodeAction,
   )
 
   useEffect(() => {
