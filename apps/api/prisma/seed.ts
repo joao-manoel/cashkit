@@ -49,7 +49,7 @@ async function seed() {
         transactionType: 'INVESTMENT',
       },
     ],
-    skipDuplicates: true, // Ignora duplicatas para evitar erro se já existirem registros iguais
+    skipDuplicates: true,
   })
 }
 

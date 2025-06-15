@@ -21,6 +21,8 @@ import { getTransactions } from './routes/transactions/get-transactions'
 import { updateTransactionsStatus } from './routes/transactions/update-transactions-status'
 import { createWallet } from './routes/wallets/create-wallet'
 import { getWallet } from './routes/wallets/get-wallet'
+import { createTransactionCategory } from './routes/categorys/create-transaction-category'
+import { getCards } from './routes/cards/get-cards'
 
 const app = fastify().withTypeProvider<ZodTypeProvider>()
 
@@ -51,6 +53,9 @@ app.register(deleteTransaction)
 app.register(updateTransactionsStatus)
 
 app.register(getTransactionsCategorys)
+
+app.register(getCards)
+app.register(createCard)
 
 errorHandler(app)
 
