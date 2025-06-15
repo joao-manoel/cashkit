@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 export const env = createEnv({
   server: {
-    PORT: z.coerce.number().default(3333),
+    PORT: z.coerce.number().default(1010),
     JWT_SECRET: z.string(),
 
     GOOGLE_OAUTH_CLIENT_SECRET: z.string(),
