@@ -1,18 +1,20 @@
 #!/bin/bash
 
+set -e
+
 echo "📥 Atualizando o repositório (git pull)..."
 git pull origin main
 
 echo "📦 Parando apenas o container da API..."
-docker compose stop cashkit-api
+docker compose stop api
 
 echo "🧹 Removendo container da API antigo..."
-docker compose rm -f cashkit-api
+docker compose rm -f api
 
 echo "🔧 Rebuildando a imagem da API..."
-docker compose build --no-cache cashkit-api
+docker compose build --no-cache api
 
 echo "🚀 Subindo novamente o container da API..."
-docker compose up -d cashkit-api
+docker compose up -d api
 
 echo "✅ Deploy finalizado com sucesso!"
