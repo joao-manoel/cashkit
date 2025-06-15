@@ -76,11 +76,14 @@ importers:
         specifier: workspace:*
         version: link:../../config/typescript-config
       '@types/node':
-        specifier: ^20.14.9
+        specifier: ^20.17.6
         version: 20.17.6
       '@types/nodemailer':
         specifier: ^6.4.17
         version: 6.4.17
+      esbuild-plugin-alias:
+        specifier: ^0.2.1
+        version: 0.2.1
       eslint:
         specifier: '8'
         version: 8.57.1
@@ -2012,6 +2015,9 @@ packages:
   es-to-primitive@1.2.1:
     resolution: {integrity: sha512-QCOllgZJtaUo9miYBcLChTUaHNjJF3PYs1VidD7AwiEj1kYxKeQTctLAezAOH5ZKRH0g2IgPn6KwB4IT8iRpvA==}
     engines: {node: '>= 0.4'}
+
+  esbuild-plugin-alias@0.2.1:
+    resolution: {integrity: sha512-jyfL/pwPqaFXyKnj8lP8iLk6Z0m099uXR45aSN8Av1XD4vhvQutxxPzgA2bTcAwQpa1zCXDcWOlhFgyP3GKqhQ==}
 
   esbuild@0.23.1:
     resolution: {integrity: sha512-VVNz/9Sa0bs5SELtn3f7qhJCDPCF5oMEl5cO9/SSinpE9hbPVvxbd572HH5AKiP7WD8INO53GgfDDhRjkylHEg==}
@@ -5280,6 +5286,8 @@ snapshots:
       is-callable: 1.2.7
       is-date-object: 1.0.5
       is-symbol: 1.0.4
+
+  esbuild-plugin-alias@0.2.1: {}
 
   esbuild@0.23.1:
     optionalDependencies:
