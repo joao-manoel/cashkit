@@ -25,7 +25,7 @@ services:
       dockerfile: apps/api/Dockerfile
     container_name: cashkit-api
     ports:
-      - "9090:9090"
+      - "1010:1010"
     depends_on:
       - pg
       - redis

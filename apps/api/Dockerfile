@@ -16,6 +16,6 @@ RUN pnpm build
 
 RUN chmod +x entrypoint.sh
 
-EXPOSE 9090
+EXPOSE 1010
 
 CMD ["./entrypoint.sh"]
