@@ -8,16 +8,21 @@ RUN npm install -g pnpm tsx typescript
 # Copia tudo do monorepo
 COPY . .
 
-# Instala as dependências do monorepo
+# Garante que o Prisma schema está presente no local correto
+# Certifique-se que apps/api/prisma/schema.prisma existe no host
+
+# Instala dependências do monorepo
 RUN pnpm install --frozen-lockfile
 
-# Gera Prisma Client
-RUN pnpm --filter @ck/api prisma generate
+# Gera Prisma Client usando o schema no caminho correto
+WORKDIR /app/apps/api
+RUN pnpm prisma generate
 
-# Compila o projeto
+# Volta para root do projeto para buildar com o filtro
+WORKDIR /app
 RUN pnpm --filter @ck/api build
 
-# Copia e dá permissão ao entrypoint
+# Dá permissão ao entrypoint
 RUN chmod +x ./apps/api/entrypoint.sh
 
 EXPOSE 9090
