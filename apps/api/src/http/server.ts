@@ -31,7 +31,10 @@ app.register(fastifyJwt, {
 app.setValidatorCompiler(validatorCompiler)
 app.setSerializerCompiler(serializerCompiler)
 
-app.register(fastifyCors, { origin: '*' })
+app.register(fastifyCors, {
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+})
 
 app.register(authenticateWithGoogle)
 app.register(authenticateWithEmail)

@@ -32,11 +32,11 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
       googleOAuthURL.searchParams.set('client_id', env.GOOGLE_OAUTH_CLIENT_ID)
       googleOAuthURL.searchParams.set(
         'client_secret',
-        env.GOOGLE_OAUTH_CLIENT_SECRET,
+        env.GOOGLE_OAUTH_CLIENT_SECRET
       )
       googleOAuthURL.searchParams.set(
         'redirect_uri',
-        env.GOOGLE_OAUTH_REDIRECT_URI,
+        env.GOOGLE_OAUTH_REDIRECT_URI
       )
       googleOAuthURL.searchParams.set('grant_type', 'authorization_code')
       googleOAuthURL.searchParams.set('code', code)
@@ -73,7 +73,7 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
           headers: {
             Authorization: `Bearer ${googleAccessToken}`,
           },
-        },
+        }
       )
 
       if (!googleUserResponse.ok) {
@@ -100,7 +100,7 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
 
       if (email === null) {
         throw new BadRequestError(
-          'Your Google account mst have an email to authenticate',
+          'Your Google account mst have an email to authenticate'
         )
       }
 
@@ -150,10 +150,10 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
           sign: {
             expiresIn: '7d',
           },
-        },
+        }
       )
 
       return reply.status(201).send({ token })
-    },
+    }
   )
 }

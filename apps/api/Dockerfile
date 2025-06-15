@@ -1,37 +1,29 @@
-# Etapa base com pnpm
-FROM node:20-alpine AS base
-WORKDIR /app
-RUN npm install -g pnpm
+FROM node:20-alpine
 
-# Etapa de dependências (instalação do monorepo)
-FROM base AS deps
 WORKDIR /app
 
-# Copia todos os arquivos do monorepo
-COPY . .
+# Instala pnpm e tsx
+RUN npm install -g pnpm tsx
 
-# Remove frontend para evitar build desnecessário e reduzir tamanho
-RUN rm -rf apps/web
+# Copia arquivos do monorepo
+COPY ../../package.json ../../pnpm-lock.yaml ../../turbo.json ./
+COPY ../../config ./config
+COPY ../../packages ./packages
+COPY ../../apps/api ./apps/api
 
-# Instala todas as dependências do monorepo (workspace)
+# Instala dependências
 RUN pnpm install --frozen-lockfile
 
-# Etapa de build da API
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app /app
+# Gera Prisma Client
+RUN pnpm --filter ./apps/api prisma generate
 
-# Builda apenas o app da API usando filtro de workspace
-RUN pnpm --filter @ck/api run build
+# Compila a API com tsconfig.build.json
+RUN pnpm --filter ./apps/api build
 
-# Etapa final de execução
-FROM node:20-alpine
-WORKDIR /app
+# Copia entrypoint que vai rodar migrate e start
+COPY apps/api/entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
 
-# Copia apenas o necessário para executar a API
-COPY --from=builder /app/apps/api/dist ./dist
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/package.json ./
+EXPOSE 9090
 
-ENV NODE_ENV=production
-CMD ["node", "dist/server.js"]
+CMD ["./entrypoint.sh"]

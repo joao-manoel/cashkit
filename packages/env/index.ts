@@ -4,31 +4,21 @@ import { z } from 'zod'
 export const env = createEnv({
   server: {
     PORT: z.coerce.number().default(3333),
-    JWT_SECRET: z.string().default('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9'),
+    JWT_SECRET: z.string(),
 
-    GOOGLE_OAUTH_CLIENT_SECRET: z
-      .string()
-      .default('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'),
-    GOOGLE_OAUTH_CLIENT_ID: z
-      .string()
-      .default(
-        '1070787267108-p7hl80m3tpeoakbtnf8e4dc4dh0cs8vc.apps.googleusercontent.com'
-      ),
-    GOOGLE_OAUTH_REDIRECT_URI: z
-      .string()
-      .default('https://cashkit.192.168.18.28:8000/api/auth/callback'),
+    GOOGLE_OAUTH_CLIENT_SECRET: z.string(),
+    GOOGLE_OAUTH_CLIENT_ID: z.string(),
+    GOOGLE_OAUTH_REDIRECT_URI: z.string(),
 
-    REDIS_HOST: z.string().default('127.0.0.1'),
-    REDIS_PORT: z.coerce.number().default(6379),
+    REDIS_HOST: z.string(),
+    REDIS_PORT: z.coerce.number(),
 
-    NODEMAILER_USER: z.string().default('jmsneto120@gmail.com'),
-    NODEMAILER_PASSWORD: z.string().default('fpxr bvoo xafd jlrr'),
+    NODEMAILER_USER: z.string(),
+    NODEMAILER_PASSWORD: z.string(),
   },
   client: {},
   shared: {
-    NEXT_PUBLIC_API_URL: z
-      .string()
-      .default('https://cashkit.192.168.18.28:8000'),
+    NEXT_PUBLIC_API_URL: z.string().default('http://localhost:3333'),
   },
   runtimeEnv: {
     PORT: process.env.PORT,
