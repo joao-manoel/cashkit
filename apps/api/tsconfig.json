@@ -10,6 +10,13 @@
       "@/*": [
         "./src/*"
       ]
-    }
+    },
+    "noEmit": false,
+    "outDir": "dist",
+    "module": "node16",
+    "moduleResolution": "node16",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "allowSyntheticDefaultImports": true
   }
 }
