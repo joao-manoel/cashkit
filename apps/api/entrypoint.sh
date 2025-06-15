@@ -3,7 +3,7 @@
 set -e
 
 echo "⏳ Aguardando banco de dados (pg:5432)..."
-until nc -z pg 5432; do
+until nc -z postgres-cashkit 5432; do
   echo "❌ Banco ainda indisponível, aguardando..."
   sleep 1
 done

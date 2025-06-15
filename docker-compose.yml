@@ -6,7 +6,7 @@ services:
       - "55432:5432"
     environment:
       - POSTGRES_USER=docker
-      - POSTGRES_PASSWORD=docker
+      - POSTGRES_PASSWORD=dockerW
       - POSTGRES_DB=cashkit
     volumes:
       - ./data/postgres:/bitnami/postgresql
