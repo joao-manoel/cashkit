@@ -22,7 +22,6 @@ RUN pnpm install --frozen-lockfile --workspace-root
 
 # Gera Prisma Client
 RUN pnpm --filter @ck/api prisma generate
-
 # Compila o projeto
 RUN pnpm --filter @ck/api build
 
