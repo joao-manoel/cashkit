@@ -9,6 +9,4 @@ echo "✅ Banco disponível. Aplicando migrações Prisma..."
 pnpm --filter @ck/api exec prisma migrate deploy
 
 echo "🚀 Iniciando aplicação..."
-pnpm --filter @ck/api exec concurrently \
-  "node dist/http/server.js" \
-  "node dist/queue/queue.js"
+pnpm --filter @ck/api exec node dist/server.mjs
