@@ -45,7 +45,6 @@ app.register(getProfile)
 
 app.register(createWallet)
 app.register(getWallet)
-app.register(createCard)
 
 app.register(getTransactions)
 app.register(createTransaction)
