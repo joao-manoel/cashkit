@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "build": "tsc && tsc-alias",
     "dev": "start pnpm dev:queue & pnpm env:load tsx watch src/http/server.ts",
