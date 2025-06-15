@@ -9,7 +9,7 @@
     "dev:queue": "pnpm env:load tsx watch src/queue/queue.ts",
     "env:load": "dotenv -e ../../.env --",
     "fix:eslint": "pnpm eslint --fix src --ext .ts,.tsx",
-    "start": "node dist/http/server.js"
+    "start": "node dist/server.mjs"
   },
   "dependencies": {
     "@ck/env": "workspace:*",

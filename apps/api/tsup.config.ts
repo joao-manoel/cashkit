@@ -1,9 +1,12 @@
 import { defineConfig } from 'tsup'
 
 export default defineConfig({
-  entry: ['src/http/server.ts'],
+  entry: {
+    'http/server': 'src/http/server.ts',
+    'queue/queue': 'src/queue/queue.ts',
+  },
   format: ['esm'],
-  target: 'node16',
+  target: 'node20',
   outDir: 'dist',
   sourcemap: true,
   clean: true,
