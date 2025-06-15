@@ -11,16 +11,13 @@ COPY package.json pnpm-lock.yaml turbo.json ./
 # Copia pacotes compartilhados
 COPY packages ./packages
 
-# Copia configurações compartilhadas (eslint, prettier, tsconfig, etc)
+# Copia configurações compartilhadas
 COPY config ./config
-
-# Copia a pasta turbo (necessário se você usa cache entre builds, tarefas etc)
-COPY .turbo ./.turbo
 
 # Copia a API
 COPY apps/api ./apps/api
 
-# Instala dependências (respeitando workspaces)
+# Instala dependências
 RUN pnpm install --frozen-lockfile
 
 # Gera Prisma Client
