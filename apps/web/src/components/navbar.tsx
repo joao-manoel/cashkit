@@ -10,11 +10,6 @@ const menuItems = [
     href: '/',
     icon: <HomeIcon className="size-5 text-gray-400" />,
   },
-  {
-    label: 'Transações',
-    href: '/transactions',
-    icon: <ArrowRightLeft className="size-5 text-gray-400" />,
-  },
 ]
 
 export default function NavBar() {

@@ -16,7 +16,7 @@ export default async function Header() {
         <Link href="/" className="flex items-center gap-2">
           <Image src={LogoIcon} className="size-6 dark:invert" alt="cashkit" />
           <span className="text-lg font-medium">
-            Cash<span className="font-bold text-blue-600">Kit</span>
+            Meu<span className="font-bold text-blue-600">Bolso</span>
           </span>
         </Link>
       </div>
