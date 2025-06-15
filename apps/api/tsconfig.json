@@ -1,6 +1,5 @@
 {
   "extends": "@ck/tsconfig/node.json",
-  "module": "ESNext",
   "include": [
     "src/**/*",
     "@types/*.d.ts"
