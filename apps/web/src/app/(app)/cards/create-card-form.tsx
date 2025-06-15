@@ -15,6 +15,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { BrandCardType, createCard } from '@/http/create-card'
+import { queryClient } from '@/lib/react-query'
 
 const brandOptions = Object.keys(BrandCardType) as Array<
   keyof typeof BrandCardType
@@ -61,6 +62,7 @@ export function CreateCardForm() {
       setName('')
       setLimit('')
       setBrand('DEFAULT')
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
     } catch (error) {
       toast.error('Erro ao criar cartão.')
     } finally {

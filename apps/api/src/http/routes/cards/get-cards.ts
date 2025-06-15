@@ -1,4 +1,4 @@
-import { BrandCardType, TransactionType } from '@prisma/client'
+import { BrandCardType } from '@prisma/client'
 import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
@@ -25,6 +25,7 @@ export async function getCards(app: FastifyInstance) {
                 name: z.string(),
                 brand: z.nativeEnum(BrandCardType),
                 limit: z.number(),
+                used: z.number(),
               })
             ),
           },
@@ -32,23 +33,48 @@ export async function getCards(app: FastifyInstance) {
       },
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
+
         const user = await prisma.user.findFirst({
-          where: {
-            id: userId,
-          },
+          where: { id: userId },
         })
 
         if (!user) {
-          throw new UnauthorizedError('Você precisa esta autenticado!')
+          throw new UnauthorizedError('Você precisa estar autenticado!')
         }
 
         const cards = await prisma.card.findMany({
           where: {
             ownerId: user.id,
           },
+          select: {
+            id: true,
+            name: true,
+            brand: true,
+            limit: true,
+            Transaction: {
+              where: {
+                type: 'EXPENSE', // opcional: apenas despesas
+                status: 'pending',
+              },
+              select: {
+                amount: true,
+              },
+            },
+          },
         })
 
-        reply.status(200).send(cards)
+        const formatted = cards.map((card) => {
+          const used = card.Transaction.reduce((acc, tx) => acc + tx.amount, 0)
+          return {
+            id: card.id,
+            name: card.name,
+            brand: card.brand,
+            limit: card.limit,
+            used,
+          }
+        })
+
+        reply.status(200).send(formatted)
       }
     )
 }

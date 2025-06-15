@@ -1,10 +1,13 @@
 'use client'
 
-import { useQuery } from '@tanstack/react-query'
-import { CreditCard, Loader2 } from 'lucide-react'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { CreditCard, Loader2, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 
-import { Badge } from '@/components/ui/badge'
+import { CardIcon } from '@/components/card-icons'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Progress } from '@/components/ui/progress'
 import {
   Table,
   TableBody,
@@ -13,11 +16,14 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import deleteCard from '@/http/delete-card'
 import { getCards } from '@/http/get-cards'
 
-import CreateCardButton from './create-card-button' // ajuste o path se necessário
+import CreateCardButton from './create-card-button'
 
 export function CardsTable() {
+  const queryClient = useQueryClient()
+
   const {
     data: cards,
     isLoading,
@@ -25,6 +31,17 @@ export function CardsTable() {
   } = useQuery({
     queryKey: ['cards'],
     queryFn: getCards,
+  })
+
+  const { mutate: handleDelete, isPending: isDeleting } = useMutation({
+    mutationFn: deleteCard,
+    onSuccess: () => {
+      toast.success('Cartão deletado com sucesso!')
+      queryClient.invalidateQueries({ queryKey: ['cards'] })
+    },
+    onError: () => {
+      toast.error('Erro ao deletar cartão.')
+    },
   })
 
   return (
@@ -51,24 +68,58 @@ export function CardsTable() {
               <TableRow>
                 <TableHead>Nome</TableHead>
                 <TableHead>Bandeira</TableHead>
+                <TableHead className="text-center">Uso</TableHead>
                 <TableHead className="text-right">Limite</TableHead>
+                <TableHead className="w-[40px]" />
               </TableRow>
             </TableHeader>
             <TableBody>
-              {cards.map((card) => (
-                <TableRow key={card.name}>
-                  <TableCell>{card.name}</TableCell>
-                  <TableCell>
-                    <Badge variant="outline">{card.brand}</Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {Intl.NumberFormat('pt-BR', {
-                      style: 'currency',
-                      currency: 'BRL',
-                    }).format(card.limit / 100)}
-                  </TableCell>
-                </TableRow>
-              ))}
+              {cards.map((card) => {
+                const usedReais = card.used / 100
+                const limitReais = card.limit / 100
+                const usedPercent =
+                  limitReais === 0 ? 0 : (usedReais / limitReais) * 100
+
+                return (
+                  <TableRow key={card.id}>
+                    <TableCell>{card.name}</TableCell>
+                    <TableCell className="flex items-center gap-2">
+                      <span>{CardIcon(card.brand)}</span>
+                      <span>{card.brand}</span>
+                    </TableCell>
+                    <TableCell className="w-[240px] text-center">
+                      <div className="mb-1 text-xs text-muted-foreground">
+                        {Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(usedReais)}{' '}
+                        /{' '}
+                        {Intl.NumberFormat('pt-BR', {
+                          style: 'currency',
+                          currency: 'BRL',
+                        }).format(limitReais)}
+                      </div>
+                      <Progress value={usedPercent} className="h-2" />
+                    </TableCell>
+                    <TableCell className="text-right">
+                      {Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }).format(limitReais)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleDelete(card.id)}
+                        disabled={isDeleting}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
             </TableBody>
           </Table>
         ) : (

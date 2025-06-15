@@ -1,4 +1,5 @@
 import { cookies } from 'next/headers'
+
 import { getProfile } from '@/http/get-profile'
 
 export async function isAuthenticated() {

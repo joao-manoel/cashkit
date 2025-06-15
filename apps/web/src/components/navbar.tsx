@@ -1,5 +1,5 @@
 'use client'
-import { HomeIcon } from 'lucide-react'
+import { CreditCard, HomeIcon } from 'lucide-react'
 import Link from 'next/link'
 
 import { useMenu } from '@/context/menu-context'
@@ -9,6 +9,11 @@ const menuItems = [
     label: 'Home',
     href: '/',
     icon: <HomeIcon className="size-5 text-gray-400" />,
+  },
+  {
+    label: 'Cartões',
+    href: '/cards',
+    icon: <CreditCard className="size-5 text-gray-400" />,
   },
 ]
 

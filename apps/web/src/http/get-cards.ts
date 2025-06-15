@@ -1,9 +1,11 @@
 import { api } from './api-client'
 
 interface Cards {
+  id: string
   name: string
   brand: string
   limit: number
+  used: number
 }
 
 export async function getCards() {
