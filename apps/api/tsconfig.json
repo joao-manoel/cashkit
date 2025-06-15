@@ -12,7 +12,9 @@
       ]
     },
     "noEmit": false,
-    "types": ["node"],
+    "types": [
+      "node"
+    ],
     "outDir": "dist",
     "module": "node16",
     "moduleResolution": "node16",
