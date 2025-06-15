@@ -18,7 +18,7 @@ COPY config ./config
 COPY apps/api ./apps/api
 
 # Instala dependências
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --workspace-root
 
 # Gera Prisma Client
 RUN pnpm --filter @ck/api prisma generate
