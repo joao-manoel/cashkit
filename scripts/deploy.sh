@@ -1,5 +1,8 @@
 #!/bin/bash
 
+echo "📥 Atualizando o repositório (git pull)..."
+git pull origin main
+
 echo "📦 Parando apenas o container da API..."
 docker compose stop cashkit-api
 
