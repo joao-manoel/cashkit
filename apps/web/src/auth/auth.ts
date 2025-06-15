@@ -1,5 +1,4 @@
 import { cookies } from 'next/headers'
-
 import { getProfile } from '@/http/get-profile'
 
 export async function isAuthenticated() {
@@ -11,7 +10,8 @@ export async function getCurrentToken() {
 }
 
 export async function auth() {
-  const token = getCurrentToken()
+  const cookieStore = await cookies()
+  const token = cookieStore.get('token')?.value
 
   if (!token) {
     return { user: null }
@@ -19,9 +19,9 @@ export async function auth() {
 
   try {
     const { user } = await getProfile()
-
     return { user }
-  } catch {}
-
-  return { user: null }
+  } catch (err) {
+    cookieStore.delete('token')
+    return { user: null }
+  }
 }
