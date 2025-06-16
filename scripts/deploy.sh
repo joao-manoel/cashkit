@@ -6,19 +6,19 @@ echo "📥 Atualizando o repositório (git pull)..."
 git pull origin main
 
 echo "📦 Parando apenas o container da API..."
-docker compose stop api
+sudo docker compose stop api
 
 echo "🧹 Removendo container da API antigo..."
-docker compose rm -f api || true
+sudo docker compose rm -f api || true
 
 echo "🛠 Corrigindo permissões da pasta de dados do PostgreSQL..."
-chown -R $USER:$USER ./data/postgres
-chmod -R 755 ./data/postgres
+sudo chown -R $USER:$USER ./data/postgres
+sudo chmod -R 755 ./data/postgres
 
 echo "🔧 Rebuildando a imagem da API..."
-docker compose build --no-cache api
+sudo docker compose build --no-cache api
 
 echo "🚀 Subindo novamente o container da API..."
-docker compose up -d api
+sudo docker compose up -d api
 
 echo "✅ Deploy finalizado com sucesso!"
