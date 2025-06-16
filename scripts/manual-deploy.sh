@@ -11,9 +11,8 @@ sudo docker compose stop api
 echo "🧹 Removendo container da API antigo..."
 sudo docker compose rm -f api || true
 
-echo "🛠 Corrigindo permissões da pasta de dados do PostgreSQL..."
-sudo chown -R $USER:$USER ./data/postgres
-sudo chmod -R 755 ./data/postgres
+echo "🛠 Ajustando permissões da pasta de dados para o PostgreSQL (UID 1001)..."
+sudo chown -R 1001:1001 ./data/postgres
 
 echo "🔧 Rebuildando a imagem da API..."
 sudo docker compose build --no-cache api
