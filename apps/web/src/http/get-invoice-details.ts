@@ -19,7 +19,11 @@ interface GetInvoiceDetailsResponse {
   invoice: InvoiceDetails | null
 }
 
-export async function getInvoiceDetails(cardId: string, month: number, year: number) {
+export async function getInvoiceDetails(
+  cardId: string,
+  month: number,
+  year: number,
+) {
   const result = await api
     .get(`cards/${cardId}/invoices/${month}/${year}`)
     .json<GetInvoiceDetailsResponse>()

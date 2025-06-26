@@ -6,10 +6,10 @@ import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Button } from '@/components/ui/button'
+import { TableCell } from '@/components/ui/table'
 import { CardType } from '@/http/get-cards'
 import { getInvoiceDetails } from '@/http/get-invoice-details'
 import { payInvoice } from '@/http/pay-invoice'
-import { TableCell } from '@/components/ui/table'
 
 interface CardInvoiceDetailsProps {
   card: CardType
@@ -17,7 +17,11 @@ interface CardInvoiceDetailsProps {
   year: number
 }
 
-export function CardInvoiceDetails({ card, month, year }: CardInvoiceDetailsProps) {
+export function CardInvoiceDetails({
+  card,
+  month,
+  year,
+}: CardInvoiceDetailsProps) {
   const queryClient = useQueryClient()
 
   const isCreditCard = card.limit > 0
@@ -55,7 +59,10 @@ export function CardInvoiceDetails({ card, month, year }: CardInvoiceDetailsProp
           ) : isErrorInvoice ? (
             'Erro'
           ) : invoiceDetails ? (
-            format(new Date(year, month - 1, invoiceDetails.dueDate), 'dd/MM/yyyy')
+            format(
+              new Date(year, month - 1, invoiceDetails.dueDate),
+              'dd/MM/yyyy',
+            )
           ) : (
             'N/A'
           )

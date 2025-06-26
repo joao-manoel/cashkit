@@ -43,9 +43,11 @@ const createTransactionActionSchema = z.object({
   cardId: z.string(),
   recurrence: z.enum(['VARIABLE', 'MONTH', 'YEAR']).optional(),
   installments: z.string().optional(),
-  paymentMethod: z.enum(['PIX', 'DEBIT', 'CREDIT', 'MONEY'], {
-    message: 'Método de pagamento inválido.',
-  }).optional(),
+  paymentMethod: z
+    .enum(['PIX', 'DEBIT', 'CREDIT', 'MONEY'], {
+      message: 'Método de pagamento inválido.',
+    })
+    .optional(),
 })
 
 function createInstallmentsArray(
