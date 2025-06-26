@@ -26,9 +26,6 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
     },
     async (request, reply) => {
       const { code } = request.body
-
-      console.log(code)
-
       const googleOAuthURL = new URL('https://oauth2.googleapis.com/token')
 
       googleOAuthURL.searchParams.set('client_id', env.GOOGLE_OAUTH_CLIENT_ID)
@@ -58,6 +55,8 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
       }
 
       const googleAcessTokenData = await googleAcessTokenResponse.json()
+
+      console.log(googleAcessTokenData)
 
       // Validar e extrair o token de acesso
       const { access_token: googleAccessToken } = z
