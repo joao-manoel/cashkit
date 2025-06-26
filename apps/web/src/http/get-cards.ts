@@ -14,12 +14,15 @@ interface GetCardsResponse {
 }
 
 export async function getCards(month?: number, year?: number) {
-  const searchParams = Object.fromEntries(
-    Object.entries({ month, year })
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      .filter(([, v]) => v !== undefined)
-      .map(([k, v]) => [k, String(v)])
-  )
+  const searchParams: Record<string, string> = {}
+
+  if (month !== undefined) {
+    searchParams.month = String(month)
+  }
+
+  if (year !== undefined) {
+    searchParams.year = String(year)
+  }
 
   const result = await api
     .get('cards', {
