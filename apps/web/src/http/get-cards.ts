@@ -16,6 +16,7 @@ interface GetCardsResponse {
 export async function getCards(month?: number, year?: number) {
   const searchParams = Object.fromEntries(
     Object.entries({ month, year })
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       .filter(([, v]) => v !== undefined)
       .map(([k, v]) => [k, String(v)])
   )
