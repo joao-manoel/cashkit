@@ -25,6 +25,7 @@ export function CreateCardForm() {
   const [name, setName] = useState('')
   const [brand, setBrand] = useState<keyof typeof BrandCardType>('DEFAULT')
   const [limit, setLimit] = useState('')
+  const [dueDate, setDueDate] = useState<number>(1) // Default to day 1
   const [isSubmitting, setIsSubmitting] = useState(false)
 
   const formatCurrency = (input: string) => {
@@ -57,11 +58,13 @@ export function CreateCardForm() {
         name,
         brand,
         limit: rawLimit,
+        dueDate,
       })
       toast.success('Cartão criado com sucesso!')
       setName('')
       setLimit('')
       setBrand('DEFAULT')
+      setDueDate(1) // Reset to default day 1
       queryClient.invalidateQueries({ queryKey: ['cards'] })
     } catch (error) {
       toast.error('Erro ao criar cartão.')
@@ -116,6 +119,20 @@ export function CreateCardForm() {
           value={limit}
           onChange={handleLimitChange}
           placeholder="R$ 0,00"
+          required
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="dueDate">Dia de Vencimento da Fatura</Label>
+        <Input
+          id="dueDate"
+          type="number"
+          value={dueDate}
+          onChange={(e) => setDueDate(Number(e.target.value))}
+          placeholder="Ex: 15"
+          min={1}
+          max={31}
           required
         />
       </div>

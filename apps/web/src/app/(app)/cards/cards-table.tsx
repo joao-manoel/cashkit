@@ -16,21 +16,24 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { useDate } from '@/context/date-context'
 import deleteCard from '@/http/delete-card'
 import { getCards } from '@/http/get-cards'
 
+import { CardInvoiceDetails } from './card-invoice-details'
 import CreateCardButton from './create-card-button'
 
 export function CardsTable() {
   const queryClient = useQueryClient()
+  const { month, year } = useDate()
 
   const {
-    data: cards,
+    data: cardsData,
     isLoading,
     isError,
   } = useQuery({
-    queryKey: ['cards'],
-    queryFn: getCards,
+    queryKey: ['cards', month, year],
+    queryFn: () => getCards(month, year),
   })
 
   const { mutate: handleDelete, isPending: isDeleting } = useMutation({
@@ -43,6 +46,8 @@ export function CardsTable() {
       toast.error('Erro ao deletar cartão.')
     },
   })
+
+  const cards = cardsData?.cards || []
 
   return (
     <Card className="mt-4">
@@ -70,6 +75,9 @@ export function CardsTable() {
                 <TableHead>Bandeira</TableHead>
                 <TableHead className="text-center">Uso</TableHead>
                 <TableHead className="text-right">Limite</TableHead>
+                <TableHead className="text-right">Saldo da Conta</TableHead>
+                <TableHead className="text-right">Vencimento Fatura</TableHead>
+                <TableHead className="text-right">Ações Fatura</TableHead>
                 <TableHead className="w-[40px]" />
               </TableRow>
             </TableHeader>
@@ -107,6 +115,13 @@ export function CardsTable() {
                         currency: 'BRL',
                       }).format(limitReais)}
                     </TableCell>
+                    <TableCell className="text-right">
+                      {Intl.NumberFormat('pt-BR', {
+                        style: 'currency',
+                        currency: 'BRL',
+                      }).format(card.accountBalance / 100)}
+                    </TableCell>
+                    <CardInvoiceDetails card={card} month={month} year={year} />
                     <TableCell className="text-right">
                       <Button
                         variant="ghost"

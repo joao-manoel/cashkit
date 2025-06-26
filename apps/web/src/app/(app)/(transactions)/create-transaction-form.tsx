@@ -2,7 +2,7 @@
 import { format, startOfToday } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 import { AlertTriangle, CalendarIcon, Loader2 } from 'lucide-react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 
 import { Wallet } from '@/@types/wallet-type'
@@ -56,9 +56,18 @@ export default function CreateIncomeForm({
   const [entryType, setEntryType] = useState<EntryType>('variable')
   const [recurrenceType, setRecurrenceType] = useState<RecurrenceType>('MONTH')
   const [installments, setInstallments] = useState<number>(1)
+  const [paymentMethod, setPaymentMethod] = useState<
+    'PIX' | 'DEBIT' | 'CREDIT'
+  >('PIX')
+
+  useEffect(() => {
+    if (typeTransaction !== 'EXPENSE') {
+      setPaymentMethod('PIX') // Set to a default valid payment method
+    }
+  }, [typeTransaction])
 
   const FilterCategory = categorys.filter(
-    (category) => category.transactionType === typeTransaction,
+    (category) => category.transactionType === typeTransaction
   )
 
   const installmentOptions = useMemo(
@@ -67,7 +76,7 @@ export default function CreateIncomeForm({
         value: (i + 1).toString(),
         label: (i + 1).toString(),
       })),
-    [],
+    []
   )
 
   const formatCurrency = (input: string) => {
@@ -81,7 +90,7 @@ export default function CreateIncomeForm({
 
   const calculateInstallmentAmount = () => {
     const numericValue = parseFloat(
-      amount.replace(/[^\d,]/g, '').replace(',', '.'),
+      amount.replace(/[^\d,]/g, '').replace(',', '.')
     )
     if (isNaN(numericValue) || installments === 0) return 'R$ 0,00'
     const installmentValue = numericValue / installments
@@ -117,7 +126,8 @@ export default function CreateIncomeForm({
       setEntryType('variable')
       setRecurrenceType('MONTH')
       setInstallments(1)
-    },
+      setPaymentMethod('PIX')
+    }
   )
 
   const handleEntryType = (entryType: EntryType) => {
@@ -215,6 +225,7 @@ export default function CreateIncomeForm({
               </p>
             )}
           </div>
+
           <div className="gap-2 space-y-2">
             <Label htmlFor="status">Status</Label>
             <Select
@@ -242,6 +253,32 @@ export default function CreateIncomeForm({
               </p>
             )}
           </div>
+        </div>
+        <div className="gap-2 space-y-2">
+          <Label htmlFor="paymentMethod">Método de Pagamento</Label>
+          <Select
+            value={paymentMethod}
+            onValueChange={(value: 'PIX' | 'DEBIT' | 'CREDIT') =>
+              setPaymentMethod(value)
+            }
+            name="paymentMethod"
+          >
+            <SelectTrigger id="paymentMethod">
+              <SelectValue placeholder="Selecione o método de pagamento" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="PIX">PIX</SelectItem>
+              <SelectItem value="DEBIT">Débito</SelectItem>
+              {typeTransaction === 'EXPENSE' && (
+                <SelectItem value="CREDIT">Crédito</SelectItem>
+              )}
+            </SelectContent>
+          </Select>
+          {errors?.paymentMethod && (
+            <p className="text-xs font-medium text-red-500 dark:text-red-400">
+              {errors.paymentMethod[0]}
+            </p>
+          )}
         </div>
         <div className="grid grid-cols-[50%_minmax(50%,_1fr)] gap-2">
           <div className="space-y-2">
@@ -297,7 +334,7 @@ export default function CreateIncomeForm({
                   variant={'outline'}
                   className={cn(
                     'w-full justify-start text-left font-normal dark:bg-background',
-                    !date && 'text-muted-foreground',
+                    !date && 'text-muted-foreground'
                   )}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
@@ -360,6 +397,7 @@ export default function CreateIncomeForm({
             </p>
           )}
         </div>
+
         <div className="flex flex-col gap-4">
           <div className="space-y-2">
             <Label>Tipo de Lançamento</Label>

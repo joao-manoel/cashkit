@@ -1,21 +1,30 @@
 import { api } from './api-client'
 
-interface Cards {
+export interface CardType {
   id: string
   name: string
   brand: string
   limit: number
   used: number
+  accountBalance: number
 }
 
-export async function getCards() {
+interface GetCardsResponse {
+  cards: CardType[]
+}
+
+export async function getCards(month?: number, year?: number) {
   const result = await api
     .get(`cards`, {
+      searchParams: {
+        month,
+        year,
+      },
       next: {
         tags: [`cards`],
       },
     })
-    .json<Cards[]>()
+    .json<GetCardsResponse>()
 
   return result
 }

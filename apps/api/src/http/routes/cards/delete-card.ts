@@ -3,9 +3,9 @@ import { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
 import { BadRequestError } from '@/http/errors/bad-request-error'
+import { UnauthorizedError } from '@/http/errors/unauthorized-error'
 import { auth } from '@/http/middlewares/auth'
 import { prisma } from '@/lib/prisma'
-import { UnauthorizedError } from '@/http/errors/unauthorized-error'
 
 export async function deleteCard(app: FastifyInstance) {
   app
@@ -59,6 +59,6 @@ export async function deleteCard(app: FastifyInstance) {
         })
 
         return reply.status(204).send()
-      }
+      },
     )
 }

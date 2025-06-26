@@ -27,19 +27,21 @@ interface CreateCardProps {
   name: string
   brand: BrandCardType
   limit: number
+  dueDate: number
 }
 
 interface CreateCardResponse {
   id: string
 }
 
-export async function createCard({ name, brand, limit }: CreateCardProps) {
+export async function createCard({ name, brand, limit, dueDate }: CreateCardProps) {
   const result = await api
     .post(`card`, {
       json: {
         name,
         brand,
         limit,
+        dueDate,
       },
     })
     .json<CreateCardResponse>()

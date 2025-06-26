@@ -120,6 +120,7 @@ model Card {
   ownerId String @map("owner_id")
 
   Transaction Transaction[]
+  invoices    Invoice[]
 
   @@map("cards")
 }
@@ -141,20 +142,30 @@ enum RecurrenceType {
   YEAR
 }
 
+enum PaymentMethod {
+  PIX
+  DEBIT
+  CREDIT
+}
+
 model Transaction {
-  id         String                @id @default(uuid())
-  title      String
-  amount     Int
-  type       TransactionType       @default(INCOME)
-  recurrence RecurrenceType        @default(VARIABLE)
-  payDate    DateTime              @map("pay_date")
-  status     TransactionStatusType @default(pending)
+  id            String                @id @default(uuid())
+  title         String
+  amount        Int
+  type          TransactionType       @default(INCOME)
+  recurrence    RecurrenceType        @default(VARIABLE)
+  payDate       DateTime              @map("pay_date")
+  status        TransactionStatusType @default(pending)
+  paymentMethod PaymentMethod
 
   wallet   Wallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
   walletId String @map("wallet_id")
 
   card   Card   @relation(fields: [cardId], references: [id])
   cardId String @map("card_id")
+
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  invoiceId String?  @map("invoice_id")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -164,6 +175,26 @@ model Transaction {
   categoryId   String
 
   @@map("transactions")
+}
+
+model Invoice {
+  id        String   @id @default(uuid())
+  month     Int
+  year      Int
+  dueDate   Int @map("due_date")
+  isPaid    Boolean  @default(false) @map("is_paid")
+  paidAt    DateTime? @map("paid_at")
+
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  cardId    String   @map("card_id")
+
+  transactions Transaction[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([cardId, month, year])
+  @@map("invoices")
 }
 
 model Installments {

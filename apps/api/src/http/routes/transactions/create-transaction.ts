@@ -1,4 +1,5 @@
 import {
+  PaymentMethod,
   RecurrenceType,
   TransactionStatusType,
   TransactionType,
@@ -31,6 +32,7 @@ export async function createTransaction(app: FastifyInstance) {
             type: z.nativeEnum(TransactionType),
             payDate: z.string(),
             recurrence: z.nativeEnum(RecurrenceType),
+            paymentMethod: z.enum(['PIX', 'DEBIT', 'CREDIT']),
             categoryId: z.string().uuid(),
             cardId: z.string(),
             status: z.nativeEnum(TransactionStatusType),
@@ -66,7 +68,12 @@ export async function createTransaction(app: FastifyInstance) {
           installments,
           categoryId,
           recurrence,
+          paymentMethod,
         } = request.body
+
+        if (type === 'INCOME' && paymentMethod === 'CREDIT') {
+          throw new BadRequestError('Transações de receita não podem ser cadastradas com método de pagamento Crédito.')
+        }
 
         try {
           const wallet = await prisma.wallet.findFirst({
@@ -109,6 +116,7 @@ export async function createTransaction(app: FastifyInstance) {
               categoryId,
               recurrence,
               type,
+              paymentMethod,
               cardId,
               walletId: wallet.id,
               ...(installments && {
@@ -132,7 +140,7 @@ export async function createTransaction(app: FastifyInstance) {
             },
           })
 
-          if (status === 'paid') {
+          if (status === 'paid' && paymentMethod !== 'CREDIT') {
             await prisma.wallet.update({
               where: {
                 id: wallet.id,

@@ -1,4 +1,5 @@
 import {
+  PaymentMethod,
   RecurrenceType,
   TransactionStatusType,
   TransactionType,
@@ -32,6 +33,7 @@ export async function updateTransactionsStatus(app: FastifyInstance) {
                 type: z.nativeEnum(TransactionType),
                 amount: z.number(),
                 recurrence: z.nativeEnum(RecurrenceType),
+                paymentMethod: z.nativeEnum(PaymentMethod),
                 payDate: z.string().optional(),
                 paidAt: z.string().optional(),
                 status: z.nativeEnum(TransactionStatusType).optional(),
@@ -110,17 +112,20 @@ export async function updateTransactionsStatus(app: FastifyInstance) {
                       },
                       data: {
                         balance:
-                          transaction.type === TransactionType.EXPENSE &&
-                          transaction.status === TransactionStatusType.paid
-                            ? wallet.balance - transaction.amount
-                            : (transaction.type === TransactionType.EXPENSE &&
-                                  transaction.status ===
-                                    TransactionStatusType.pending) ||
-                                (transaction.type === TransactionType.INCOME &&
-                                  transaction.status ===
-                                    TransactionStatusType.paid)
-                              ? wallet.balance + transaction.amount
-                              : wallet.balance - transaction.amount,
+                          transaction.paymentMethod !== 'CREDIT'
+                            ? transaction.type === TransactionType.EXPENSE &&
+                              transaction.status === TransactionStatusType.paid
+                              ? wallet.balance - transaction.amount
+                              : (transaction.type === TransactionType.EXPENSE &&
+                                    transaction.status ===
+                                      TransactionStatusType.pending) ||
+                                  (transaction.type ===
+                                    TransactionType.INCOME &&
+                                    transaction.status ===
+                                      TransactionStatusType.paid)
+                                ? wallet.balance + transaction.amount
+                                : wallet.balance - transaction.amount
+                            : wallet.balance,
                       },
                     }),
                   ])
@@ -144,17 +149,19 @@ export async function updateTransactionsStatus(app: FastifyInstance) {
                     },
                     data: {
                       balance:
-                        transaction.type === TransactionType.EXPENSE &&
-                        transaction.status === TransactionStatusType.paid
-                          ? wallet.balance - transaction.amount
-                          : (transaction.type === TransactionType.EXPENSE &&
-                                transaction.status ===
-                                  TransactionStatusType.pending) ||
-                              (transaction.type === TransactionType.INCOME &&
-                                transaction.status ===
-                                  TransactionStatusType.paid)
-                            ? wallet.balance + transaction.amount
-                            : wallet.balance - transaction.amount,
+                        transaction.paymentMethod !== 'CREDIT'
+                          ? transaction.type === TransactionType.EXPENSE &&
+                            transaction.status === TransactionStatusType.paid
+                            ? wallet.balance - transaction.amount
+                            : (transaction.type === TransactionType.EXPENSE &&
+                                  transaction.status ===
+                                    TransactionStatusType.pending) ||
+                                (transaction.type === TransactionType.INCOME &&
+                                  transaction.status ===
+                                    TransactionStatusType.paid)
+                              ? wallet.balance + transaction.amount
+                              : wallet.balance - transaction.amount
+                          : wallet.balance,
                     },
                   }),
                 ])
@@ -178,16 +185,19 @@ export async function updateTransactionsStatus(app: FastifyInstance) {
                   },
                   data: {
                     balance:
-                      transaction.type === TransactionType.EXPENSE &&
-                      transaction.status === TransactionStatusType.paid
-                        ? wallet.balance - transaction.amount
-                        : (transaction.type === TransactionType.EXPENSE &&
-                              transaction.status ===
-                                TransactionStatusType.pending) ||
-                            (transaction.type === TransactionType.INCOME &&
-                              transaction.status === TransactionStatusType.paid)
-                          ? wallet.balance + transaction.amount
-                          : wallet.balance - transaction.amount,
+                      transaction.paymentMethod !== 'CREDIT'
+                        ? transaction.type === TransactionType.EXPENSE &&
+                          transaction.status === TransactionStatusType.paid
+                          ? wallet.balance - transaction.amount
+                          : (transaction.type === TransactionType.EXPENSE &&
+                                transaction.status ===
+                                  TransactionStatusType.pending) ||
+                              (transaction.type === TransactionType.INCOME &&
+                                transaction.status ===
+                                  TransactionStatusType.paid)
+                            ? wallet.balance + transaction.amount
+                            : wallet.balance - transaction.amount
+                        : wallet.balance,
                   },
                 }),
               ])
@@ -214,22 +224,25 @@ export async function updateTransactionsStatus(app: FastifyInstance) {
                     },
                     data: {
                       balance:
-                        transaction.type === TransactionType.EXPENSE &&
-                        transaction.status === TransactionStatusType.paid
-                          ? wallet.balance -
-                            transaction.amount / transaction.installments.length
-                          : (transaction.type === TransactionType.EXPENSE &&
-                                transaction.status ===
-                                  TransactionStatusType.pending) ||
-                              (transaction.type === TransactionType.INCOME &&
-                                transaction.status ===
-                                  TransactionStatusType.paid)
-                            ? wallet.balance +
+                        transaction.paymentMethod !== 'CREDIT'
+                          ? transaction.type === TransactionType.EXPENSE &&
+                            transaction.status === TransactionStatusType.paid
+                            ? wallet.balance -
                               transaction.amount /
                                 transaction.installments.length
-                            : wallet.balance -
-                              transaction.amount /
-                                transaction.installments.length,
+                            : (transaction.type === TransactionType.EXPENSE &&
+                                  transaction.status ===
+                                    TransactionStatusType.pending) ||
+                                (transaction.type === TransactionType.INCOME &&
+                                  transaction.status ===
+                                    TransactionStatusType.paid)
+                              ? wallet.balance +
+                                transaction.amount /
+                                  transaction.installments.length
+                              : wallet.balance -
+                                transaction.amount /
+                                  transaction.installments.length
+                          : wallet.balance,
                     },
                   }),
                 ])

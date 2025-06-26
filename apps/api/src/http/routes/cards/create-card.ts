@@ -20,6 +20,7 @@ export async function createCard(app: FastifyInstance) {
             name: z.string(),
             brand: z.nativeEnum(BrandCardType),
             limit: z.number(),
+            dueDate: z.number(),
           }),
           response: {
             201: z.object({
@@ -31,7 +32,10 @@ export async function createCard(app: FastifyInstance) {
       async (request, reply) => {
         const userId = await request.getCurrentUserId()
 
-        const { name, brand, limit } = request.body
+        const { name, brand, limit, dueDate } = request.body
+
+        const currentMonth = new Date().getMonth() + 1; // Mês atual
+        const currentYear = new Date().getFullYear(); // Ano atual
 
         const card = await prisma.card.create({
           data: {
@@ -39,6 +43,13 @@ export async function createCard(app: FastifyInstance) {
             brand,
             limit,
             user: { connect: { id: userId } },
+            invoices: {
+              create: {
+                month: currentMonth,
+                year: currentYear,
+                dueDate,
+              },
+            },
           },
         })
 

@@ -17,6 +17,7 @@ interface CreateTransactionRequest {
   categoryId: string
   cardId: string
   status: 'paid' | 'pending'
+  paymentMethod: 'PIX' | 'DEBIT' | 'CREDIT' | 'MONEY'
   installments?: Installment[]
 }
 
@@ -34,6 +35,7 @@ export async function createTransaction({
   categoryId,
   cardId,
   status,
+  paymentMethod,
   installments,
 }: CreateTransactionRequest) {
   const result = await api
@@ -47,6 +49,7 @@ export async function createTransaction({
         categoryId,
         cardId,
         status,
+        paymentMethod,
         ...(installments && { installments }),
       },
     })

@@ -43,6 +43,9 @@ const createTransactionActionSchema = z.object({
   cardId: z.string(),
   recurrence: z.enum(['VARIABLE', 'MONTH', 'YEAR']).optional(),
   installments: z.string().optional(),
+  paymentMethod: z.enum(['PIX', 'DEBIT', 'CREDIT', 'MONEY'], {
+    message: 'Método de pagamento inválido.',
+  }).optional(),
 })
 
 function createInstallmentsArray(
@@ -97,6 +100,7 @@ export async function createTransactionAction(data: FormData) {
     installments,
     type,
     walletId,
+    paymentMethod,
   } = result.data
 
   if (!walletId) {
@@ -122,6 +126,7 @@ export async function createTransactionAction(data: FormData) {
       ...(recurrence ? { recurrence } : { recurrence: 'VARIABLE' }),
       categoryId,
       cardId,
+      paymentMethod: paymentMethod || 'PIX',
       ...(installments && {
         installments: createInstallmentsArray(installments, payDate),
       }),

@@ -3,10 +3,10 @@ import type { FastifyInstance } from 'fastify'
 import type { ZodTypeProvider } from 'fastify-type-provider-zod'
 import { z } from 'zod'
 
+import { BadRequestError } from '@/http/errors/bad-request-error'
+import { UnauthorizedError } from '@/http/errors/unauthorized-error'
 import { auth } from '@/http/middlewares/auth'
 import { prisma } from '@/lib/prisma'
-import { UnauthorizedError } from '@/http/errors/unauthorized-error'
-import { BadRequestError } from '@/http/errors/bad-request-error'
 
 export async function createTransactionCategory(app: FastifyInstance) {
   app
@@ -59,13 +59,13 @@ export async function createTransactionCategory(app: FastifyInstance) {
 
         if (!category) {
           throw new BadRequestError(
-            'Não foi possivel criar a categoria, tente novamente mais tarde!'
+            'Não foi possivel criar a categoria, tente novamente mais tarde!',
           )
         }
 
         return reply.status(201).send({
           id: category.id,
         })
-      }
+      },
     )
 }
