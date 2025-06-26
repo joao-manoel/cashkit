@@ -56,8 +56,6 @@ export async function authenticateWithGoogle(app: FastifyInstance) {
 
       const googleAcessTokenData = await googleAcessTokenResponse.json()
 
-      console.log(googleAcessTokenData)
-
       // Validar e extrair o token de acesso
       const { access_token: googleAccessToken } = z
         .object({
