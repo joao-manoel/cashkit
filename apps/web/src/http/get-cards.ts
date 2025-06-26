@@ -14,14 +14,17 @@ interface GetCardsResponse {
 }
 
 export async function getCards(month?: number, year?: number) {
+  const searchParams = Object.fromEntries(
+    Object.entries({ month, year })
+      .filter(([, v]) => v !== undefined)
+      .map(([k, v]) => [k, String(v)])
+  )
+
   const result = await api
-    .get(`cards`, {
-      searchParams: {
-        month,
-        year,
-      },
+    .get('cards', {
+      searchParams,
       next: {
-        tags: [`cards`],
+        tags: ['cards'],
       },
     })
     .json<GetCardsResponse>()
